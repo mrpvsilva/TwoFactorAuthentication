@@ -11,14 +11,13 @@ namespace WebApplication.Handlers
 {
     public class RegisterUserHandler : RequestHandler<RegisterUser, User>
     {
-        private readonly IUserManager _manager;
         private readonly RegisterUserValidator _validator;
+
         public RegisterUserHandler(
             NotificationContext notification,
-            IUserManager manager,
-            RegisterUserValidator validator) : base(notification)
+            IUserManager userManager,
+            RegisterUserValidator validator) : base(notification, userManager)
         {
-            _manager = manager;
             _validator = validator;
         }
 
@@ -34,7 +33,7 @@ namespace WebApplication.Handlers
                 return default;
             }
 
-            await _manager.AddUserAsync(user);
+            await UserManager.AddUserAsync(user);
 
             return user;
 

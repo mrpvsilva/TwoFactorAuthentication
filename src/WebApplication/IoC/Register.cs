@@ -18,6 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddMediatR(typeof(WebApplication.Startup));
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<RegisterUserValidator>();
+            services.AddScoped<AuthValidator>();
         }
     }
 }

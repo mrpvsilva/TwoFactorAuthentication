@@ -20,7 +20,7 @@ export default function Register({ history }) {
     const onSubmit = data => {
 
         Api
-            .post('/auth', data)
+            .post('/account', data)
             .then(res => res.data && history.push('/login'));
     }
 

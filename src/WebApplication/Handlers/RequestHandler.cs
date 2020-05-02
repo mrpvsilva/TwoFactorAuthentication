@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using WebApplication.Managers;
 using WebApplication.Notifications;
 
 namespace WebApplication.Handlers
@@ -10,11 +11,15 @@ namespace WebApplication.Handlers
     {
 
         protected readonly NotificationContext Notification;
+        protected readonly IUserManager UserManager;
 
 
-        public RequestHandler(NotificationContext notification)
+        public RequestHandler(
+            NotificationContext notification,
+            IUserManager userManager)
         {
             Notification = notification;
+            UserManager = userManager;
         }
         public abstract Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken);
     }

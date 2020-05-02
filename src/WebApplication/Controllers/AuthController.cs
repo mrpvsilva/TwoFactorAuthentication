@@ -1,6 +1,8 @@
 ﻿using System.Text.Encodings.Web;
+using System.Threading.Tasks;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using OtpNet;
+using WebApplication.Models;
 
 namespace WebApplication.Controllers
 {
@@ -9,37 +11,38 @@ namespace WebApplication.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UrlEncoder _urlEncoder;
+        private readonly IMediator _mediator;
 
-        public AuthController(UrlEncoder urlEncoder)
+        public AuthController(IMediator mediator, UrlEncoder urlEncoder)
         {
+            _mediator = mediator;
             _urlEncoder = urlEncoder;
         }
 
 
-        [HttpGet]
-        public IActionResult Generate()
-        {
-            
-            //string uri = string.Format("otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6", _urlEncoder.Encode("TwoFactAuth"), _urlEncoder.Encode("teste@email.com"), hash);
-
-            return Ok();
-        }
-
         [HttpPost]
-        public IActionResult Verify([FromBody] Verify verify)
+        public async Task<IActionResult> Auth([FromBody] Account account)
         {
-            var otp = new Totp(Base32Encoding.ToBytes(verify.Hash));
-            var computed = otp.ComputeTotp();
-            var valid = otp.VerifyTotp(verify.Code, out long timeStepMatch);
-            return Ok(new { valid, timeStepMatch, computed, verify.Code });
+            return Ok(await _mediator.Send(account));
         }
+
+        [HttpPost("AddTwoFactAuth")]
+        public async Task<IActionResult> AddTwoFactAuth([FromBody] AddTwoFactAuth addTwoFactAuth)
+        {
+            return Ok(await _mediator.Send(addTwoFactAuth));
+        }
+
+        [HttpPost("VerifyCode")]
+        public async Task<IActionResult> VerifyCode([FromBody] VerifyCode verify)
+        {
+            return Ok(await _mediator.Send(verify));
+        }
+
+
+
     }
 
-    public class Verify
-    {
-        public string Code { get; set; }
-        public string Hash { get; set; }
-    }
 
-    
+
+
 }

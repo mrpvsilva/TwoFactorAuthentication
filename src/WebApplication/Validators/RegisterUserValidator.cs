@@ -20,11 +20,7 @@ namespace WebApplication.Validators
                 .EmailAddress()
                 .WithMessage("E-mail is invalid")
                 .MustAsync(async (a, b, c) => !await ctx.Users.AnyAsync(x => x.Email == b))
-                .WithMessage("E-mail already registered");
-
-            RuleFor(x => x.Key)
-                .NotEmpty()
-                .WithMessage("Key is required");
+                .WithMessage("E-mail already registered");          
         }
     }
 }

@@ -19,7 +19,12 @@ export default function Login({ history }) {
 
         Api
             .post('/auth', data)
-            .then(res => res.data && history.push('/login'));
+            .then(({ data }) => {
+                if (data) {
+                    sessionStorage.tfa = JSON.stringify(data);
+                    history.push('/twofactauth');
+                }
+            });
     }
 
     return (
