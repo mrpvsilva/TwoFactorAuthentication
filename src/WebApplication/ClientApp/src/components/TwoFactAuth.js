@@ -10,7 +10,7 @@ export default function TwoFactAuth({ history }) {
     const [tfa, setTfa] = useState({
         authenticatorUri: '',
         hash: '',
-        key: ''
+        hasTwoFactorAuth: ''
     });
 
     const { register, handleSubmit, errors } = useForm({
@@ -20,11 +20,12 @@ export default function TwoFactAuth({ history }) {
     });
 
     const onSubmit = data => {
+        const { hasTwoFactorAuth } = tfa;
         Api
-            .post('/auth/TwoFactAuth', { ...data, ...tfa })
+            .post(`/auth/${hasTwoFactorAuth ? 'VerifyCode' : 'AddTwoFactAuth'}`, { ...data, ...tfa })
             .then(({ data }) => {
 
-                if (data && data.matched) {
+                if (data) {
                     sessionStorage.removeItem('tfa');
                     history.push('/');
                 }
