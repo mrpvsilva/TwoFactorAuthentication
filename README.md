@@ -11,3 +11,5 @@ Projeto .Net Core 3.1 e React Js exemplificando uma autenticação com dois fato
 [Entity Framework Core - Usando o banco de dados SQLite](http://www.macoratti.net/17/04/efcore_sqlite1.htm)
 
 [MediatR](https://github.com/jbogard/MediatR)
+
+[Substituindo o Redux pelo Context API & React Hooks](https://medium.com/reactbrasil/substituindo-o-redux-pelo-context-api-react-hooks-a70e995daa1d)
