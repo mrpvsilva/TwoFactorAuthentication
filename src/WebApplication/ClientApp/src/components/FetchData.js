@@ -1,35 +1,32 @@
 import React, { Component } from 'react';
+import Api from '../api';
 
 export class FetchData extends Component {
   static displayName = FetchData.name;
 
   constructor(props) {
     super(props);
-    this.state = { forecasts: [], loading: true };
+    this.state = { persons: [], loading: true };
   }
 
   componentDidMount() {
-    this.populateWeatherData();
+    this.populatePersonsData();
   }
 
-  static renderForecastsTable(forecasts) {
+  static renderPersonsTable(persons) {
     return (
       <table className='table table-striped' aria-labelledby="tabelLabel">
         <thead>
           <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
+            <th>FirstName</th>
+            <th>Email</th>
           </tr>
         </thead>
         <tbody>
-          {forecasts.map(forecast =>
-            <tr key={forecast.date}>
-              <td>{forecast.date}</td>
-              <td>{forecast.temperatureC}</td>
-              <td>{forecast.temperatureF}</td>
-              <td>{forecast.summary}</td>
+          {persons.map(person =>
+            <tr key={person.id}>
+              <td>{person.firstName}</td>
+              <td>{person.email}</td>
             </tr>
           )}
         </tbody>
@@ -40,20 +37,23 @@ export class FetchData extends Component {
   render() {
     let contents = this.state.loading
       ? <p><em>Loading...</em></p>
-      : FetchData.renderForecastsTable(this.state.forecasts);
+      : FetchData.renderPersonsTable(this.state.persons);
 
     return (
       <div>
-        <h1 id="tabelLabel" >Weather forecast</h1>
+        <h1 id="tabelLabel" >Persons</h1>
         <p>This component demonstrates fetching data from the server.</p>
         {contents}
       </div>
     );
   }
 
-  async populateWeatherData() {
-    const response = await fetch('weatherforecast');
-    const data = await response.json();
-    this.setState({ forecasts: data, loading: false });
+  populatePersonsData() {
+    Api.get('/persons')
+      .then(({ data }) => {
+        if (data) {
+          this.setState({ persons: data, loading: false });
+        }
+      })
   }
 }

@@ -3,6 +3,7 @@ import QrCode from 'qrcode.react';
 import { useForm } from 'react-hook-form';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
+import { Container } from 'reactstrap';
 
 export default function TwoFactAuth({ history }) {
 
@@ -46,32 +47,34 @@ export default function TwoFactAuth({ history }) {
     }, [history])
 
     return (
-        <div className="justify-content-center row">
-            <div className="col-md-9 col-lg-7 col-xl-6">
-                <div className="mx-4 card">
-                    <div className="p-4 card-body">
-                        <form onSubmit={handleSubmit(onSubmit)}>
-                            <h3>Two Factor Authentication</h3>
-                            <div className="mb-3 input-group justify-content-center row">
-                                {tfa.authenticatorUri && <QrCode value={tfa.authenticatorUri} size={150} />}
-                            </div>
-                            <div className="mb-3 input-group">
+        <Container style={{ marginTop: '10%' }}>
+            <div className="justify-content-center row">
+                <div className="col-md-9 col-lg-7 col-xl-6">
+                    <div className="mx-4 card">
+                        <div className="p-4 card-body">
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <h3>Two Factor Authentication</h3>
+                                <div className="mb-3 input-group justify-content-center row">
+                                    {tfa.authenticatorUri && <QrCode value={tfa.authenticatorUri} size={150} />}
+                                </div>
+                                <div className="mb-3 input-group">
 
-                                <input name="code" type="number" className="form-control"
-                                    ref={register({
-                                        required: 'Code is required',
-                                        minLength: {
-                                            value: 6,
-                                            message: "Code must have at least 6 characters"
-                                        }
-                                    })} />
-                            </div>
-                            <ErrorMessage error={errors.code} />
-                            <button className="btn btn-success btn-block">Verify Code</button>
-                        </form>
+                                    <input name="code" type="number" className="form-control"
+                                        ref={register({
+                                            required: 'Code is required',
+                                            minLength: {
+                                                value: 6,
+                                                message: "Code must have at least 6 characters"
+                                            }
+                                        })} />
+                                </div>
+                                <ErrorMessage error={errors.code} />
+                                <button className="btn btn-success btn-block">Verify Code</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </Container>
     )
 }
