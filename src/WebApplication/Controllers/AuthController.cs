@@ -41,9 +41,5 @@ namespace WebApplication.Controllers
         public string Hash { get; set; }
     }
 
-    public class Account
-    {
-        public string Email { get; set; }
-        public string Password { get; set; }
-    }
+    
 }

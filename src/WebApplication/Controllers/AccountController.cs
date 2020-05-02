@@ -20,7 +20,7 @@ namespace WebApplication.Controllers
         public async Task<IActionResult> Register([FromBody] RegisterUser register)
         {
             var user = await _mediator.Send(register);
-            return Ok(new { user.Id, user.Email });
+            return Ok(new { user?.Id, user?.Email });
         }
     }
 }

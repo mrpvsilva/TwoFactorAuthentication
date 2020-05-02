@@ -26,6 +26,10 @@ namespace WebApplication.Data
         {
             builder
                 .HasKey(x => x.Id);
+
+            builder
+                .HasIndex(x => x.Email)
+                .IsUnique();
         }
     }
 }

@@ -1,41 +1,90 @@
-import React, { useEffect, useState } from 'react';
-import QRCode from 'qrcode.react';
-import axios from 'axios';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Person, Lock } from 'react-bootstrap-icons';
+import { Link } from 'react-router-dom';
+import ErrorMessage from './ErrorMessage';
+import Api from '../api';
 
 
-export default function Login() {
+export default function Login({ history }) {
 
-    const [data, setData] = useState({ uri: '', hash: '' });
-    const [code, setCode] = useState('');
+    const { register, handleSubmit, errors } = useForm({
+        defaultValues: {
+            email: '',
+            password: ''
+        }
+    });
 
-    useEffect(() => {
-        fetch('https://localhost:44308/api/Auth')
-            .then(res => res.json())
-            .then(json => setData(json));
-    }, [])
+    const onSubmit = data => {
 
-
-    const handleChange = (e) => setCode(e.target.value);
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        axios
-            .post('https://localhost:44308/api/Auth', { hash: data.hash, code })
-            .then(res => console.log(res.data))
-            .catch(error => console.log(error))
+        Api
+            .post('/auth', data)
+            .then(res => res.data && history.push('/login'));
     }
 
     return (
-        <>
-            {data.uri && <QRCode style={{ marginBottom: '20px' }} value={data.uri} />}
-            {
-                data.hash &&
-                <form onSubmit={handleSubmit}>
-                    <input onChange={handleChange} style={{ marginBottom: '5px' }} />
-                    <br />
-                    <button>Enviar</button>
-                </form>
-            }
-        </>
+        <div className="justify-content-center row">
+            <div className="col-md-8">
+                <div className="card-group">
+                    <div className="p-4 card">
+                        <div className="card-body">
+                            <form onSubmit={handleSubmit(onSubmit)}>
+                                <h1>Login</h1>
+                                <p className="text-muted">Sign In to your account</p>
+                                <div className="mb-3 input-group">
+                                    <div className="input-group-prepend">
+                                        <span className="input-group-text">
+                                            <Person />
+                                        </span>
+                                    </div>
+                                    <input name="email" placeholder="E-mail" autoComplete="email" type="text" className="form-control"
+                                        ref={register({
+                                            required: 'E-mail is required',
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                                                message: "E-mail is invalid"
+                                            }
+                                        })}
+                                    />
+                                </div>
+                                <ErrorMessage error={errors.email} />
+                                <div className="mb-4 input-group">
+                                    <div className="input-group-prepend">
+                                        <span className="input-group-text">
+                                            <Lock />
+                                        </span>
+                                    </div>
+                                    <input name="password" placeholder="Password" autoComplete="current-password" type="password" className="form-control"
+                                        ref={register({
+                                            required: 'Password is required'
+                                        })}
+                                    />
+                                </div>
+                                <ErrorMessage error={errors.password} />
+                                <div className="row">
+                                    <div className="col-6">
+                                        <button className="px-4 btn btn-primary">Login</button>
+                                    </div>
+                                    <div className="text-right col-6">
+                                        <button className="px-0 btn btn-link">Forgot password?</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div className="text-white bg-primary py-5 d-md-down-none card" style={{ width: "44%" }}>
+                        <div className="text-center card-body">
+                            <div>
+                                <h2>Sign up</h2>
+                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                                <Link to="register">
+                                    <button tabIndex="-1" className="mt-3 btn btn-primary active">Register Now!</button>
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     )
 }
