@@ -27,6 +27,7 @@ export default function TwoFactAuth({ history }) {
 
                 if (data) {
                     sessionStorage.removeItem('tfa');
+                    localStorage.token = JSON.stringify(data);
                     history.push('/');
                 }
             })
