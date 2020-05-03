@@ -10,6 +10,8 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using WebApplication.Jwt;
+using System.Text;
+using System.Text.Encodings.Web;
 
 namespace WebApplication.Managers
 {
@@ -18,16 +20,19 @@ namespace WebApplication.Managers
         private readonly TFAContext _ctx;
         private readonly SigningConfigurations _signingConfigurations;
         private readonly TokenConfigurations _tokenConfigurations;
+        private readonly UrlEncoder _urlEncoder;
 
         public UserManager(
             TFAContext ctx,
             SigningConfigurations signingConfigurations,
-            TokenConfigurations tokenConfigurations
+            TokenConfigurations tokenConfigurations,
+            UrlEncoder urlEncoder
             )
         {
             _ctx = ctx;
             _signingConfigurations = signingConfigurations;
             _tokenConfigurations = tokenConfigurations;
+            _urlEncoder = urlEncoder;
         }
 
         public async Task<User> AddUserAsync(User user)
@@ -42,12 +47,15 @@ namespace WebApplication.Managers
         public async Task<TwoFactAuth> GetTwoFactAuthAsync(string email)
         {
             var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            string unformattedKey = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey());
+
 
             return new TwoFactAuth
             {
-                AuthenticatorUri = user.AuthenticatorUri,
+                AuthenticatorUri = GenerateQrCodeUri(user, unformattedKey),
                 HasTwoFactorAuth = user.HasTwoFactorAuth,
-                Hash = user.Id
+                Hash = user.Id,
+                SharedKey = FormatKey(user, unformattedKey)
             };
         }
 
@@ -62,6 +70,7 @@ namespace WebApplication.Managers
         {
 
             string secret = HttpUtility.ParseQueryString(new Uri(authenticatorUri).Query).Get("secret");
+
 
             if (VerifyTotp(secret, code))
             {
@@ -119,6 +128,34 @@ namespace WebApplication.Managers
             });
 
             return handler.WriteToken(securityToken);
-        }       
+        }
+
+        private string GenerateQrCodeUri(User user, string unformattedKey)
+        {
+            if (user == null || user.HasTwoFactorAuth)
+                return default;
+
+            return string.Format("otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6", _urlEncoder.Encode("TwoFactAuth"), _urlEncoder.Encode(user.Email), unformattedKey);
+        }
+
+        private string FormatKey(User user, string unformattedKey)
+        {
+            if (user == null || user.HasTwoFactorAuth)
+                return default;
+
+            var result = new StringBuilder();
+            int currentPosition = 0;
+            while (currentPosition + 4 < unformattedKey.Length)
+            {
+                result.Append(unformattedKey.Substring(currentPosition, 4)).Append(" ");
+                currentPosition += 4;
+            }
+            if (currentPosition < unformattedKey.Length)
+            {
+                result.Append(unformattedKey.Substring(currentPosition));
+            }
+
+            return result.ToString().ToLowerInvariant();
+        }
     }
 }

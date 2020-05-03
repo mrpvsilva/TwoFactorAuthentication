@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1-alpine AS build-env
 WORKDIR /app
 
 # Copiar csproj e restaurar dependencias
-COPY /src/WebApplication/*.csproj .
+COPY /src/WebApplication/WebApplication.csproj .
 RUN dotnet restore
 
 # Build da aplicacao
@@ -19,14 +19,11 @@ WORKDIR /app
 COPY /src/react-app/package.json .
 COPY /src/react-app/package-lock.json .
 
-
 RUN npm install --silent
 RUN npm install react-scripts@3.4.1 -g --silent
 
 # add app
 COPY /src/react-app .
-
-RUN  ls .
 
 # build app
 RUN npm run build
@@ -37,6 +34,9 @@ WORKDIR /app
 COPY --from=build-env /app/publish .
 COPY --from=build-deps /app/build ./wwwroot
 
+RUN apk update
+RUN apk add openntpd
 
-ENTRYPOINT ["dotnet", "WebApplication.dll"]
-#CMD ASPNETCORE_URLS=http://*:$PORT dotnet WebApplication.dll
+
+#ENTRYPOINT ["dotnet", "WebApplication.dll"]
+CMD ASPNETCORE_URLS=http://*:$PORT dotnet WebApplication.dll

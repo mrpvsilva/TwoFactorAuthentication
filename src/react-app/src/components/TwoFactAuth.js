@@ -13,7 +13,8 @@ export default function TwoFactAuth({ history }) {
     const [tfa, setTfa] = useState({
         authenticatorUri: '',
         hash: '',
-        hasTwoFactorAuth: ''
+        hasTwoFactorAuth: '',
+        sharedKey: ''
     });
 
     const { register, handleSubmit, errors } = useForm({
@@ -58,6 +59,23 @@ export default function TwoFactAuth({ history }) {
                         <div className="p-4 card-body">
                             <form onSubmit={handleSubmit(onSubmit)}>
                                 <h3>Two Factor Authentication</h3>
+                                {
+                                    tfa.sharedKey && (
+                                        <div className="">
+                                            <p>Digitalize o QR code ou digite esta chave <kbd>{tfa.sharedKey}</kbd> no Google Authenticator.</p>
+                                            <ul>
+                                                <li>
+                                                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Android</a>
+                                                </li>
+                                                <li>
+                                                    <a href="https://apps.apple.com/br/app/google-authenticator/id388497605">IPhone</a>
+                                                </li>
+                                            </ul>
+
+
+                                        </div>
+                                    )
+                                }
                                 <div className="mb-3 input-group justify-content-center row">
                                     {tfa.authenticatorUri && <QrCode value={tfa.authenticatorUri} size={150} />}
                                 </div>
