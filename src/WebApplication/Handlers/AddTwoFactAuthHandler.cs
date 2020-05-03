@@ -14,9 +14,15 @@ namespace WebApplication.Handlers
 
         public async override Task<Auth> Handle(AddTwoFactAuth request, CancellationToken cancellationToken)
         {
-            return await UserManager.AddTwoFactorTokenAsync(request.Hash, request.AuthenticatorUri, request.Code);
+            var auth = await UserManager.AddTwoFactorTokenAsync(request.Hash, request.AuthenticatorUri, request.Code);
 
-           
+            if (auth == null)
+            {
+                Notification.AddNotification("code", "Code invalid");
+            }
+
+            return auth;
+
         }
     }
 }

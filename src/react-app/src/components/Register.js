@@ -4,9 +4,11 @@ import { Lock } from 'react-bootstrap-icons';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
 import { Container } from 'reactstrap';
+import { useAlert } from "react-alert";
 
 export default function Register({ history }) {
 
+    const alert = useAlert();
     const { register, handleSubmit, watch, errors } = useForm({
         defaultValues: {
             email: '',
@@ -22,7 +24,13 @@ export default function Register({ history }) {
 
         Api
             .post('/account', data)
-            .then(res => res.data && history.push('/login'));
+            .then(({ data }) => {
+                if (data) {
+                    history.push('/login')
+                    alert.success('Success')
+                }
+            })
+            .catch(err => alert.error('Request error'));
     }
 
     return (

@@ -11,13 +11,12 @@ import TwoFactAuth from './components/TwoFactAuth';
 
 
 export default function Routes() {
-  return (
-    
-    <Switch>     
-      <Route exact path='/login' component={Login} />
-      <Route exact path='/register' component={Register} />
-      <Route exact path='/twofactauth' component={TwoFactAuth} />
-      <PrivateRoute path="/"  component={Layout}/>
-    </Switch>
-  )
+    return (
+        <Switch>
+            <Route exact path='/login' component={Login} />
+            <Route exact path='/register' component={Register} />
+            <Route exact path='/twofactauth' component={TwoFactAuth} />
+            <PrivateRoute path="/" component={Layout} />
+        </Switch>
+    )
 }

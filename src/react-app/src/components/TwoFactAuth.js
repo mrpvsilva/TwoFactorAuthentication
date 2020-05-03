@@ -4,9 +4,11 @@ import { useForm } from 'react-hook-form';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
 import { Container } from 'reactstrap';
+import { useAlert } from "react-alert";
 
 export default function TwoFactAuth({ history }) {
 
+    const alert = useAlert();
 
     const [tfa, setTfa] = useState({
         authenticatorUri: '',
@@ -30,8 +32,10 @@ export default function TwoFactAuth({ history }) {
                     sessionStorage.removeItem('tfa');
                     localStorage.token = JSON.stringify(data);
                     history.push('/');
+                    alert.success('Success')
                 }
             })
+            .catch(err => alert.error('Request error'))
     }
 
     useEffect(() => {

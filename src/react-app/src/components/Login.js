@@ -5,10 +5,14 @@ import { Link } from 'react-router-dom';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
 import { Container } from 'reactstrap';
+import { useAlert } from "react-alert";
+
+import './Login.css'
 
 
 export default function Login({ history }) {
 
+    const alert = useAlert();
     const { register, handleSubmit, errors } = useForm({
         defaultValues: {
             email: '',
@@ -24,8 +28,10 @@ export default function Login({ history }) {
                 if (data) {
                     sessionStorage.tfa = JSON.stringify(data);
                     history.push('/twofactauth');
+                    alert.success('Success');
                 }
-            });
+            })
+            .catch(err => alert.error('Request error'));
     }
 
     useEffect(() => {
@@ -38,7 +44,7 @@ export default function Login({ history }) {
     return (
         <Container style={{ marginTop: '10%' }}>
             <div className="justify-content-center row">
-                <div className="col-md-5">
+                <div className="col-md-8">
                     <div className="card-group">
                         <div className="p-4 card">
                             <div className="card-body">
@@ -83,14 +89,18 @@ export default function Login({ history }) {
                                             <button className="px-0 btn btn-link">Forgot password?</button>
                                         </div>
                                     </div>
-                                    <div className="row">
-                                        <div className="col-12">
-                                            <Link to="register">
-                                                <button tabIndex="-1" className="mt-3 btn btn-primary active">Register Now!</button>
-                                            </Link>
-                                        </div>
-                                    </div>
                                 </form>
+                            </div>
+                        </div>
+                        <div class="text-white bg-primary py-5 d-md-down-none card" style={{ width: "44%;" }}>
+                            <div class="text-center card-body">
+                                <div>
+                                    <h2>Sign up</h2>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+                                    <Link to="register">
+                                        <button tabIndex="-1" className="mt-3 btn btn-primary active">Register Now!</button>
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>

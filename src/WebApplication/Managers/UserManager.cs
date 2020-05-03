@@ -119,8 +119,6 @@ namespace WebApplication.Managers
             });
 
             return handler.WriteToken(securityToken);
-        }
+        }       
     }
-
-
 }

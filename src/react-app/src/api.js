@@ -1,9 +1,10 @@
 import axios from 'axios';
 import { history } from './index';
 
+console.log(process.env.REACT_APP_API_ENDPOINT)
 
 const api = axios.create({
-    baseURL: 'https://localhost:44308/api'
+    baseURL: process.env.REACT_APP_API_ENDPOINT
 });
 
 
@@ -28,7 +29,7 @@ api.interceptors.response.use(res => res, error => {
 
     console.log(error);
 
-    if (status === 401) {
+    if (error.response && error.response.status === 401) {
         localStorage.removeItem('token');
         history.push('/login');
     }

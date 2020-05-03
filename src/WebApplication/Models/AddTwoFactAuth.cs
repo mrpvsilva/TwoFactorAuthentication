@@ -1,6 +1,5 @@
 ﻿using System;
 using MediatR;
-using WebApplication.Managers;
 
 namespace WebApplication.Models
 {

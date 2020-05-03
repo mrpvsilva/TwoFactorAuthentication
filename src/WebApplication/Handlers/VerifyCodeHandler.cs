@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using WebApplication.Managers;
 using WebApplication.Models;
@@ -17,7 +14,14 @@ namespace WebApplication.Handlers
 
         public async override Task<Auth> Handle(VerifyCode request, CancellationToken cancellationToken)
         {
-            return await UserManager.VerifyCodeAsync(request.Hash, request.Code);
+            var auth = await UserManager.VerifyCodeAsync(request.Hash, request.Code);
+
+            if (auth == null)
+            {
+                Notification.AddNotification("code", "Code invalid");
+            }
+
+            return auth;
         }
     }
 }
