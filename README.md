@@ -11,3 +11,7 @@ Projeto .Net Core 3.1 e React Js exemplificando uma autenticação com dois fato
 [Entity Framework Core - Usando o banco de dados SQLite](http://www.macoratti.net/17/04/efcore_sqlite1.htm)
 
 [MediatR](https://github.com/jbogard/MediatR)
+
+[Implement JWT In ASP.NET Core 3.1](https://www.c-sharpcorner.com/article/implement-jwt-in-asp-net-core-3-1/)
+
+[Dockerizing a React App](https://mherman.org/blog/dockerizing-a-react-app/)
