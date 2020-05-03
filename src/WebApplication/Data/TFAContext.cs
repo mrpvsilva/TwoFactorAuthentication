@@ -15,14 +15,13 @@ namespace WebApplication.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
-            modelBuilder.Entity<User>(UserConfigurting);
+            modelBuilder.Entity<User>(UserBuilder);
 
             base.OnModelCreating(modelBuilder);
         }
 
 
-        private void UserConfigurting(EntityTypeBuilder<User> builder)
+        private void UserBuilder(EntityTypeBuilder<User> builder)
         {
             builder
                 .HasKey(x => x.Id);

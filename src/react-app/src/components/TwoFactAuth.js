@@ -5,6 +5,7 @@ import ErrorMessage from './ErrorMessage';
 import Api from '../api';
 import { Container } from 'reactstrap';
 import { useAlert } from "react-alert";
+import { CopyToClipboard } from 'react-copy-to-clipboard';
 
 export default function TwoFactAuth({ history }) {
 
@@ -39,6 +40,10 @@ export default function TwoFactAuth({ history }) {
             .catch(err => alert.error('Request error'))
     }
 
+    const handleClick = () => {
+        alert.info("Chave copiada para área de transferência");
+    }
+
     useEffect(() => {
         const tfa = sessionStorage.getItem('tfa');
 
@@ -62,7 +67,11 @@ export default function TwoFactAuth({ history }) {
                                 {
                                     tfa.sharedKey && (
                                         <div className="">
-                                            <p>Digitalize o QR code ou digite esta chave <kbd>{tfa.sharedKey}</kbd> no Google Authenticator.</p>
+                                            <CopyToClipboard
+                                                text={tfa.sharedKey}
+                                                onCopy={handleClick}>
+                                                <p>Digitalize o QR code ou digite esta chave <kbd>{tfa.sharedKey}</kbd> no Google Authenticator.</p>
+                                            </CopyToClipboard>
                                             <ul>
                                                 <li>
                                                     <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Android</a>
