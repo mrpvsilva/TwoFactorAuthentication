@@ -1,5 +1,5 @@
 # TwoFactorAuthentication
-Projeto .Net Core 3.1 e React Js exemplificando uma autenticação com dois fatores (TOTP) com o Google Authenticator
+Projeto .Net Core 3.1, React Js e Google Authenticator, exemplificando uma autenticação de dois fatores (TOTP). 
 
 [Demo](https://twofactauth.herokuapp.com)
 
