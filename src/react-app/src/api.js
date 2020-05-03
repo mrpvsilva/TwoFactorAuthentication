@@ -25,13 +25,15 @@ api.interceptors.request.use(async (config) => {
 
 api.interceptors.response.use(res => res, error => {
 
-    const { status } = error.response;
-
     console.log(error);
 
-    if (error.response && error.response.status === 401) {
-        localStorage.removeItem('token');
-        history.push('/login');
+    if (error.response) {
+        const { status } = error.response;
+        
+        if (status === 401) {
+            localStorage.removeItem('token');
+            history.push('/login');
+        }
     }
     // Do something with response error
     return Promise.reject(error)
