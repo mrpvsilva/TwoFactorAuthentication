@@ -1,5 +1,7 @@
 # TwoFactorAuthentication
-Projeto .Net Core 3.1 e React Js exemplificando uma autenticação com dois fatores
+Projeto .Net Core 3.1 e React Js exemplificando uma autenticação com dois fatores com o Google Authenticator
+
+[Demo](https://twofactauth.herokuapp.com)
 
 # Referências
 [Otp.NET](https://github.com/kspearrin/Otp.NET)
