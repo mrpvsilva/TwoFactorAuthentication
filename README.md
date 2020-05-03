@@ -15,3 +15,5 @@ Projeto .Net Core 3.1 e React Js exemplificando uma autenticação com dois fato
 [Implement JWT In ASP.NET Core 3.1](https://www.c-sharpcorner.com/article/implement-jwt-in-asp-net-core-3-1/)
 
 [Dockerizing a React App](https://mherman.org/blog/dockerizing-a-react-app/)
+
+[OpenNTPD](https://wiki.archlinux.org/index.php/OpenNTPD#Client)
