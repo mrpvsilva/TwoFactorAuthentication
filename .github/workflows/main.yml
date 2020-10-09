@@ -30,15 +30,14 @@ jobs:
           mkdir ./sonarscanner
           dotnet tool update dotnet-sonarscanner --tool-path ./sonarscanner
           ls
-      # - name: Build and analyze
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      #   run: |
-      #     ls
-      #     .\.sonar\scanner\dotnet-sonarscanner begin /k:"TwoFactorAuthentication" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-      #     dotnet build
-      #     .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          ./sonarscanner/dotnet-sonarscanner begin /k:"TwoFactorAuthentication" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          dotnet build
+          ./sonarscanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
       # - name: Build, Push and Deploy to Heroku
       #   id: heroku
       #   uses: jctaveras/heroku-deploy@v1.0.0      
