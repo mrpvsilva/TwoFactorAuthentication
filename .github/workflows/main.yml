@@ -35,9 +35,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          ./sonarscanner/dotnet-sonarscanner begin /k:"TwoFactorAuthentication" /o:"calculator-juros" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+          ./sonarscanner/dotnet-sonarscanner begin /k:"mrpvsilva_TwoFactorAuthentication" /o:"mrpvsilva" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
-          ./sonarscanner/dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          ./sonarscanner/dotnet-sonarscanner  end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
       # - name: Build, Push and Deploy to Heroku
       #   id: heroku
       #   uses: jctaveras/heroku-deploy@v1.0.0      
