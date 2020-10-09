@@ -49,7 +49,7 @@ export default function Login({ history }) {
                         <div className="p-4 card">
                             <div className="card-body">
                                 <form onSubmit={handleSubmit(onSubmit)}>
-                                    <h1>Login</h1>
+                                    <h1>Login Kary</h1>
                                     <p className="text-muted">Sign In to your account</p>
                                     <div className="mb-3 input-group">
                                         <div className="input-group-prepend">
