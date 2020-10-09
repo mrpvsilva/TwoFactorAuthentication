@@ -30,7 +30,7 @@ jobs:
           mkdir ./sonarscanner
           dotnet tool update dotnet-sonarscanner --tool-path ./sonarscanner
           ls
-      - name: Build and analyze
+      - name: Build and analyze webapi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -39,11 +39,11 @@ jobs:
           ./sonarscanner/dotnet-sonarscanner begin /k:"mrpvsilva_TwoFactorAuthentication" /o:"mrpvsilva" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
           ./sonarscanner/dotnet-sonarscanner  end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-      # - name: Build, Push and Deploy to Heroku
-      #   id: heroku
-      #   uses: jctaveras/heroku-deploy@v1.0.0      
-      #   with:
-      #     email: ${{ secrets.HEROKU_EMAIL }}
-      #     api_key: ${{ secrets.HEROKU_API_KEY }}
-      #     app_name: ${{ secrets.HEROKU_APP_NAME }}
-      #     dockerfile: '.'
+      - name: Build, Push and Deploy to Heroku
+        id: heroku
+        uses: jctaveras/heroku-deploy@v1.0.0      
+        with:
+          email: ${{ secrets.HEROKU_EMAIL }}
+          api_key: ${{ secrets.HEROKU_API_KEY }}
+          app_name: ${{ secrets.HEROKU_APP_NAME }}
+          dockerfile: '.'
