@@ -21,14 +21,14 @@ jobs:
         id: cache-sonar-scanner
         uses: actions/cache@v1
         with:
-          path: ./.sonar/scanner
+          path: .sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         run: |
-          mkdir ./.sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+          mkdir .sonar/scanner
+          dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
           ls
       # - name: Build and analyze
       #   env:
