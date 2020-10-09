@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static void AddApplicationServices(this IServiceCollection services)
         {
             services.AddScoped<NotificationContext>();
-            services.AddDbContext<TFAContext>(x => x.UseSqlite("Data Source = tfa.db"));
+            services.AddDbContext<TfaContext>(x => x.UseSqlite("Data Source = tfa.db"));
             services.AddMediatR(typeof(WebApplication.Startup));
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<RegisterUserValidator>();

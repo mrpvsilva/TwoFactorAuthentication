@@ -7,7 +7,7 @@ namespace WebApplication.Validators
 {
     public class RegisterUserValidator : AbstractValidator<User>
     {
-        public RegisterUserValidator(TFAContext ctx)
+        public RegisterUserValidator(TfaContext ctx)
         {
             RuleFor(x => x.Password)
                 .NotEmpty()

@@ -8,7 +8,7 @@ using WebApplication.Data;
 
 namespace WebApplication.Data.Migrations
 {
-    [DbContext(typeof(TFAContext))]
+    [DbContext(typeof(TfaContext))]
     [Migration("20200502141849_add_unique_email")]
     partial class add_unique_email
     {

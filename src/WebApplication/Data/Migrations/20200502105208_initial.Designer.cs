@@ -8,7 +8,7 @@ using WebApplication.Data;
 
 namespace WebApplication.Data.Migrations
 {
-    [DbContext(typeof(TFAContext))]
+    [DbContext(typeof(TfaContext))]
     [Migration("20200502105208_initial")]
     partial class initial
     {

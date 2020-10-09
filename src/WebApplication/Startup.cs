@@ -56,7 +56,7 @@ namespace WebApplication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TFAContext ctx)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TfaContext ctx)
         {
             // migrate any database changes on startup (includes initial db creation)
             ctx.Database.Migrate();

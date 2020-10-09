@@ -7,7 +7,7 @@ using WebApplication.Data;
 
 namespace WebApplication.Data.Migrations
 {
-    [DbContext(typeof(TFAContext))]
+    [DbContext(typeof(TfaContext))]
     partial class TFAContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

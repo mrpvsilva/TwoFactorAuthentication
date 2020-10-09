@@ -1,5 +1,4 @@
-﻿using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WebApplication.Models;
@@ -10,15 +9,12 @@ namespace WebApplication.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UrlEncoder _urlEncoder;
         private readonly IMediator _mediator;
 
-        public AuthController(IMediator mediator, UrlEncoder urlEncoder)
+        public AuthController(IMediator mediator)
         {
             _mediator = mediator;
-            _urlEncoder = urlEncoder;
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Auth([FromBody] Account account)
@@ -38,11 +34,6 @@ namespace WebApplication.Controllers
             return Ok(await _mediator.Send(verify));
         }
 
-
-
     }
-
-
-
 
 }

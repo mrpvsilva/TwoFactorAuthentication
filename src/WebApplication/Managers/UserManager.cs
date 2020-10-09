@@ -17,13 +17,13 @@ namespace WebApplication.Managers
 {
     public class UserManager : IUserManager
     {
-        private readonly TFAContext _ctx;
+        private readonly TfaContext _ctx;
         private readonly SigningConfigurations _signingConfigurations;
         private readonly TokenConfigurations _tokenConfigurations;
         private readonly UrlEncoder _urlEncoder;
 
         public UserManager(
-            TFAContext ctx,
+            TfaContext ctx,
             SigningConfigurations signingConfigurations,
             TokenConfigurations tokenConfigurations,
             UrlEncoder urlEncoder

@@ -14,7 +14,7 @@ namespace WebApplication.Handlers
         protected readonly IUserManager UserManager;
 
 
-        public RequestHandler(
+        protected RequestHandler(
             NotificationContext notification,
             IUserManager userManager)
         {

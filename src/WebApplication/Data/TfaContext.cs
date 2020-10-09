@@ -4,11 +4,11 @@ using WebApplication.Entities;
 
 namespace WebApplication.Data
 {
-    public class TFAContext : DbContext
+    public class TfaContext : DbContext
     {
         public DbSet<User> Users { get; set; }
 
-        public TFAContext(DbContextOptions<TFAContext> options) : base(options)
+        public TfaContext(DbContextOptions<TfaContext> options) : base(options)
         {
 
         }
