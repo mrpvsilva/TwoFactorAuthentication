@@ -35,6 +35,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
+          echo ${{ secrets.GITHUB_TOKEN }}
           ./sonarscanner/dotnet-sonarscanner begin /k:"mrpvsilva_TwoFactorAuthentication" /o:"mrpvsilva" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet build
           ./sonarscanner/dotnet-sonarscanner  end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
