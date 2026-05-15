@@ -14,7 +14,7 @@ namespace WebApplication.Validators
                 .WithMessage("Password is required");
 
             RuleFor(x => x.Email)
-                .Cascade(CascadeMode.StopOnFirstFailure)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
                 .WithMessage("E-mail is required")
                 .EmailAddress()

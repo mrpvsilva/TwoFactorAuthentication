@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 
 namespace WebApplication.Jwt
@@ -8,14 +8,12 @@ namespace WebApplication.Jwt
         public SecurityKey Key { get; }
         public SigningCredentials SigningCredentials { get; }
 
-        public SigningConfigurations()
+        public SigningConfigurations(string privateKeyPem)
         {
-            using (var provider = new RSACryptoServiceProvider(2048))
-            {
-                Key = new RsaSecurityKey(provider.ExportParameters(true));
-            }
-
-            SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.RsaSha256Signature);
+            var rsa = RSA.Create();
+            rsa.ImportFromPem(privateKeyPem);
+            Key = new RsaSecurityKey(rsa);
+            SigningCredentials = new SigningCredentials(Key, SecurityAlgorithms.RsaSha256);
         }
     }
 }
