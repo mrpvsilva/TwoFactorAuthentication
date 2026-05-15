@@ -19,7 +19,8 @@ namespace Microsoft.Extensions.DependencyInjection
         public static void AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<NotificationContext>();
-            services.AddDbContext<TfaContext>(x => x.UseSqlite("Data Source = tfa.db"));
+            services.AddDbContext<TfaContext>(x =>
+                x.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<WebApplication.Startup>());
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<RegisterUserValidator>();
