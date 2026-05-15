@@ -1,96 +1,91 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Lock } from 'react-bootstrap-icons';
+import { useNavigate } from 'react-router-dom';
+import { Container } from 'reactstrap';
+import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
-import { Container } from 'reactstrap';
-import { useAlert } from "react-alert";
 
-export default function Register({ history }) {
+export default function Register() {
+  const navigate = useNavigate();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    defaultValues: { email: '', password: '', repeatpassword: '' }
+  });
 
-    const alert = useAlert();
-    const { register, handleSubmit, watch, errors } = useForm({
-        defaultValues: {
-            email: '',
-            password: '',
-            repeatpassword: ''
+  const password = watch('password', '');
+
+  const onSubmit = data => {
+    Api.post('/account', data)
+      .then(({ data }) => {
+        if (data) {
+          navigate('/login');
+          toast.success('Success');
         }
-    });
+      })
+      .catch(() => toast.error('Request error'));
+  };
 
-    const password = useRef({});
-    password.current = watch("password", "");
-
-    const onSubmit = data => {
-
-        Api
-            .post('/account', data)
-            .then(({ data }) => {
-                if (data) {
-                    history.push('/login')
-                    alert.success('Success')
-                }
-            })
-            .catch(err => alert.error('Request error'));
-    }
-
-    return (
-        <Container style={{ marginTop: '10%' }}>
-            <div className="justify-content-center row">
-                <div className="col-md-9 col-lg-7 col-xl-6">
-                    <div className="mx-4 card">
-                        <div className="p-4 card-body">
-                            <form onSubmit={handleSubmit(onSubmit)}>
-                                <h1>Register</h1>
-                                <p className="text-muted">Create your account</p>
-                                <div className="mb-3 input-group">
-                                    <div className="input-group-prepend">
-                                        <span className="input-group-text">@</span>
-                                    </div>
-                                    <input name="email" placeholder="Email" autoComplete="email" type="text" className="form-control"
-                                        ref={register({
-                                            required: 'E-mail is required',
-                                            pattern: {
-                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                                                message: "E-mail is invalid"
-                                            }
-                                        })} />
-                                </div>
-                                <ErrorMessage error={errors.email} />
-                                <div className="mb-3 input-group">
-                                    <div className="input-group-prepend">
-                                        <span className="input-group-text">
-                                            <Lock />
-                                        </span>
-                                    </div>
-                                    <input name="password" placeholder="Password" autoComplete="new-password" type="password" className="form-control"
-                                        ref={register({
-                                            required: 'Password is required',
-                                            minLength: {
-                                                value: 8,
-                                                message: "Password must have at least 8 characters"
-                                            }
-                                        })} />
-                                </div>
-                                <ErrorMessage error={errors.password} />
-                                <div className="mb-4 input-group">
-                                    <div className="input-group-prepend">
-                                        <span className="input-group-text">
-                                            <Lock />
-                                        </span>
-                                    </div>
-                                    <input name="repeatpassword" placeholder="Repeat password" autoComplete="new-password" type="password" className="form-control"
-                                        ref={register({
-                                            validate: value =>
-                                                value === password.current || "The passwords do not match"
-                                        })} />
-                                </div>
-                                <ErrorMessage error={errors.repeatpassword} />
-                                <button className="btn btn-success btn-block">Create Account</button>
-                            </form>
-                        </div>
-                    </div>
+  return (
+    <Container style={{ marginTop: '10%' }}>
+      <div className="justify-content-center row">
+        <div className="col-md-9 col-lg-7 col-xl-6">
+          <div className="mx-4 card">
+            <div className="p-4 card-body">
+              <form onSubmit={handleSubmit(onSubmit)}>
+                <h1>Register</h1>
+                <p className="text-muted">Create your account</p>
+                <div className="mb-3 input-group">
+                  <span className="input-group-text">@</span>
+                  <input
+                    placeholder="Email"
+                    autoComplete="email"
+                    type="text"
+                    className="form-control"
+                    {...register('email', {
+                      required: 'E-mail is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                        message: 'E-mail is invalid'
+                      }
+                    })}
+                  />
                 </div>
+                <ErrorMessage error={errors.email} />
+                <div className="mb-3 input-group">
+                  <span className="input-group-text"><Lock /></span>
+                  <input
+                    placeholder="Password"
+                    autoComplete="new-password"
+                    type="password"
+                    className="form-control"
+                    {...register('password', {
+                      required: 'Password is required',
+                      minLength: { value: 8, message: 'Password must have at least 8 characters' }
+                    })}
+                  />
+                </div>
+                <ErrorMessage error={errors.password} />
+                <div className="mb-4 input-group">
+                  <span className="input-group-text"><Lock /></span>
+                  <input
+                    placeholder="Repeat password"
+                    autoComplete="new-password"
+                    type="password"
+                    className="form-control"
+                    {...register('repeatpassword', {
+                      validate: value => value === password || 'The passwords do not match'
+                    })}
+                  />
+                </div>
+                <ErrorMessage error={errors.repeatpassword} />
+                <button className="btn btn-success w-100">Create Account</button>
+                <button type="button" className="btn btn-outline-secondary w-100 mt-2" onClick={() => navigate(-1)}>Back</button>
+              </form>
             </div>
-        </Container>
-    )
+          </div>
+        </div>
+      </div>
+    </Container>
+  );
 }
