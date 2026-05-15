@@ -36,7 +36,7 @@ export default function TwoFactAuth() {
           toast.success('Success');
         }
       })
-      .catch(() => toast.error('Request error'));
+      .catch(() => {});
   };
 
   return (

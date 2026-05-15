@@ -28,7 +28,7 @@ export default function Login() {
           toast.success('Success');
         }
       })
-      .catch(() => toast.error('Request error'));
+      .catch(() => {});
   };
 
   return (

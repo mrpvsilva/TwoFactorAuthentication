@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toast } from 'react-toastify';
 import { navigate } from './navigate';
 
 const api = axios.create({
@@ -21,7 +22,16 @@ api.interceptors.response.use(res => res, error => {
   if (error.response?.status === 401) {
     localStorage.removeItem('token');
     navigate('/login');
+    return Promise.reject(error);
   }
+
+  const errors = error.response?.data;
+  if (Array.isArray(errors) && errors.length > 0) {
+    errors.forEach(err => toast.error(err.message));
+  } else {
+    toast.error('Request error');
+  }
+
   return Promise.reject(error);
 });
 

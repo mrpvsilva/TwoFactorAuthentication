@@ -23,7 +23,7 @@ export default function Register() {
           toast.success('Success');
         }
       })
-      .catch(() => toast.error('Request error'));
+      .catch(() => {});
   };
 
   return (
