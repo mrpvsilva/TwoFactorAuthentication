@@ -6,13 +6,14 @@ export default function FetchData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Api.get('/persons')
-      .then(({ data }) => {
-        if (data) {
-          setPersons(data);
-          setLoading(false);
-        }
-      });
+    const controller = new AbortController();
+
+    Api.get('/persons', { signal: controller.signal })
+      .then(({ data }) => setPersons(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
   }, []);
 
   return (

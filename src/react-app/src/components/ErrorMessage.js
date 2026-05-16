@@ -1,5 +1,5 @@
-import React from 'react'
+import React from 'react';
 
 export default function ErrorMessage({ error }) {
-    return (error ? (<p style={{ color: '#dc3545', fontSize: '.9em' }}>{error.message}</p>) : (<></>))
+  return error ? <p style={{ color: '#dc3545', fontSize: '.9em' }}>{error.message}</p> : null;
 }

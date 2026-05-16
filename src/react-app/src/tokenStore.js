@@ -10,4 +10,5 @@ export const setAccessToken = (token) => {
 
 export const registerTokenChangeCallback = (fn) => {
   _onTokenChange = fn;
+  return () => { _onTokenChange = null; };
 };

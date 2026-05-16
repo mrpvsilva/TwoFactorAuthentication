@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { isCancel } from 'axios';
 import { toast } from 'react-toastify';
 import { navigate } from './navigate';
 import { getAccessToken, setAccessToken } from './tokenStore';
@@ -27,6 +27,8 @@ const processQueue = (error, token = null) => {
 api.interceptors.response.use(
   (res) => res,
   async (error) => {
+    if (isCancel(error)) return Promise.reject(error);
+
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry && getAccessToken()) {

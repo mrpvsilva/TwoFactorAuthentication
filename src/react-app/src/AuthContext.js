@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import api from './api';
 import { navigate } from './navigate';
 import { setAccessToken as storeSetToken, registerTokenChangeCallback } from './tokenStore';
+import { authService } from './services/authService';
 
 const AuthContext = createContext(null);
 
@@ -15,17 +15,19 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    registerTokenChangeCallback(_setAccessToken);
+    const unregister = registerTokenChangeCallback(_setAccessToken);
 
-    api.post('/auth/refresh')
+    authService.refresh()
       .then(({ data }) => setAccessToken(data.accessToken))
       .catch(() => setAccessToken(null))
       .finally(() => setIsLoading(false));
+
+    return unregister;
   }, []);
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await authService.logout();
     } catch {}
     setAccessToken(null);
     navigate('/login');
