@@ -9,8 +9,11 @@ namespace WebApplication.Validators
         public AuthValidator(IUserManager manager)
         {
             RuleFor(x => x.Email)
+                .Cascade(CascadeMode.Stop)
                 .NotEmpty()
-                .WithMessage("E-mail is required");
+                .WithMessage("E-mail is required")
+                .EmailAddress()
+                .WithMessage("E-mail format is invalid");
 
             RuleFor(x => x.Password)
                 .NotEmpty()
@@ -24,7 +27,7 @@ namespace WebApplication.Validators
 
                     var user = await manager.PasswordSignInAsync(a.Email, a.Password);
 
-                    if (user == null) b.AddFailure("Login invalid");
+                    if (user == null) b.AddFailure("Invalid e-mail or password");
                 });
         }
     }

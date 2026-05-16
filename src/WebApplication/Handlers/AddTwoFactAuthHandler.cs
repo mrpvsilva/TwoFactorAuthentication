@@ -18,7 +18,7 @@ namespace WebApplication.Handlers
 
             if (auth == null)
             {
-                Notification.AddNotification("code", "Code invalid");
+                Notification.AddNotification("code", "Invalid authenticator code. Check your app and try again");
             }
 
             return auth;

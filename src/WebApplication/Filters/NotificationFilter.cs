@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using WebApplication.Notifications;
 
 namespace WebApplication.Filters
@@ -24,7 +25,10 @@ namespace WebApplication.Filters
 				context.HttpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
 				context.HttpContext.Response.ContentType = "application/json";
 
-				var notifications = JsonConvert.SerializeObject(_notificationContext.Notifications);
+				var notifications = JsonConvert.SerializeObject(_notificationContext.Notifications, new JsonSerializerSettings
+				{
+					ContractResolver = new CamelCasePropertyNamesContractResolver()
+				});
 				await context.HttpContext.Response.WriteAsync(notifications);
 
 				return;

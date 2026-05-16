@@ -29,8 +29,8 @@ export default function Register() {
   return (
     <Container style={{ marginTop: '10%' }}>
       <div className="justify-content-center row">
-        <div className="col-md-9 col-lg-7 col-xl-6">
-          <div className="mx-4 card">
+        <div className="col-md-5 col-lg-4">
+          <div className="card">
             <div className="p-4 card-body">
               <form onSubmit={handleSubmit(onSubmit)}>
                 <h1>Register</h1>

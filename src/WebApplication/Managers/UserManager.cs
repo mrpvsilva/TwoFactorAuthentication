@@ -73,7 +73,7 @@ namespace WebApplication.Managers
         {
             var user = await _ctx.Users.FindAsync(id);
 
-            if (!VerifyTotp(user.Key, code))
+            if (user == null || !VerifyTotp(user.Key, code))
                 return default;
 
             return new Auth { AccessToken = _jwtService.GenerateToken(user) };
