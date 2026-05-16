@@ -69,7 +69,9 @@ Handlers/
  ResetPasswordHandler.cs
  VerifyCodeHandler.cs
  VerifyResetCodeHandler.cs
-IoC/Register.cs
+IoC/
+ RateLimitingExtensions.cs
+ Register.cs
 Jwt/
  IJwtService.cs
  JwtService.cs

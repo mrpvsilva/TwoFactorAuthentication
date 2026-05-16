@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.DependencyInjection;
 using WebApplication.Models;
 
 namespace WebApplication.Controllers
@@ -17,6 +19,7 @@ namespace WebApplication.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitingExtensions.AuthLogin)]
         public async Task<IActionResult> Auth([FromBody] Account account)
         {
             return Ok(await _mediator.Send(account));
@@ -29,6 +32,7 @@ namespace WebApplication.Controllers
         }
 
         [HttpPost("VerifyCode")]
+        [EnableRateLimiting(RateLimitingExtensions.Auth2Fa)]
         public async Task<IActionResult> VerifyCode([FromBody] VerifyCode verify)
         {
             return Ok(await _mediator.Send(verify));

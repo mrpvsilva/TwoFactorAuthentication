@@ -1,7 +1,9 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using WebApplication.Models;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.DependencyInjection;
+using WebApplication.Models;
 
 namespace WebApplication.Controllers
 {
@@ -17,6 +19,7 @@ namespace WebApplication.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitingExtensions.AccountRegister)]
         public async Task<IActionResult> Register([FromBody] RegisterUser register)
         {
             var user = await _mediator.Send(register);
