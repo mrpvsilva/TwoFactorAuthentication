@@ -13,6 +13,8 @@ namespace Microsoft.Extensions.DependencyInjection
         public const string AuthForgotPassword = "auth-forgot-password";
         public const string AuthResetPassword = "auth-reset-password";
         public const string AccountRegister = "account-register";
+        public const string AuthResetTotp = "auth-reset-totp";
+        public const string AuthRefresh = "auth-refresh";
 
         public static void AddRateLimiting(this IServiceCollection services)
         {
@@ -85,6 +87,30 @@ namespace Microsoft.Extensions.DependencyInjection
                         {
                             PermitLimit = 10,
                             Window = TimeSpan.FromHours(1),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 0
+                        }));
+
+                // Reset TOTP: 3 tentativas por hora por IP
+                options.AddPolicy(AuthResetTotp, context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 3,
+                            Window = TimeSpan.FromHours(1),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 0
+                        }));
+
+                // Refresh token: 20 chamadas por minuto por IP (silent refresh + F5)
+                options.AddPolicy(AuthRefresh, context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 20,
+                            Window = TimeSpan.FromMinutes(1),
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                             QueueLimit = 0
                         }));

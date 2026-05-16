@@ -1,7 +1,7 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
@@ -48,7 +48,7 @@ export default function ForgotPassword() {
                 </div>
                 <ErrorMessage error={errors.email} />
                 <button className="btn btn-primary w-100" disabled={isSubmitting}>
-                  {isSubmitting ? 'Sending...' : 'Send Code'}
+                  {isSubmitting ? <Spinner size="sm" /> : 'Send Code'}
                 </button>
                 <button
                   type="button"

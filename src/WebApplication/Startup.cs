@@ -38,7 +38,8 @@ namespace WebApplication
                     if (allowedOrigins.Length > 0)
                         builder.WithOrigins(allowedOrigins)
                                .AllowAnyMethod()
-                               .AllowAnyHeader();
+                               .AllowAnyHeader()
+                               .AllowCredentials();
                 });
             });
 

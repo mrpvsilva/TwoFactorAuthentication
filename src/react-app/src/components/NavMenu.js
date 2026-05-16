@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../AuthContext';
 import './NavMenu.css';
 
 export default function NavMenu() {
   const [collapsed, setCollapsed] = useState(true);
-  const navigate = useNavigate();
-
-  const handleLogout = (e) => {
-    e.preventDefault();
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+  const { logout } = useAuth();
 
   return (
     <header>
@@ -28,7 +23,10 @@ export default function NavMenu() {
                 <NavLink tag={Link} className="text-dark" to='/fetch-data'>Fetch data</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink tag={Link} className="text-dark" to='#' onClick={handleLogout}>Logout</NavLink>
+                <NavLink tag={Link} className="text-dark" to='/reset-totp'>Reset TOTP</NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink href='#' className="text-dark" onClick={(e) => { e.preventDefault(); logout(); }}>Logout</NavLink>
               </NavItem>
             </ul>
           </Collapse>

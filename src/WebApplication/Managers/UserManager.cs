@@ -3,6 +3,8 @@ using WebApplication.Data;
 using WebApplication.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
 using OtpNet;
 using WebApplication.Models;
@@ -66,7 +68,8 @@ namespace WebApplication.Managers
             user.Key = secret;
             await _ctx.SaveChangesAsync();
 
-            return new Auth { AccessToken = _jwtService.GenerateToken(user) };
+            var refreshToken = await GenerateRefreshTokenAsync(user.Id);
+            return new Auth { AccessToken = _jwtService.GenerateToken(user), RefreshToken = refreshToken };
         }
 
         public async Task<Auth> VerifyCodeAsync(Guid id, string code)
@@ -76,7 +79,59 @@ namespace WebApplication.Managers
             if (user == null || !VerifyTotp(user.Key, code))
                 return default;
 
-            return new Auth { AccessToken = _jwtService.GenerateToken(user) };
+            var refreshToken = await GenerateRefreshTokenAsync(user.Id);
+            return new Auth { AccessToken = _jwtService.GenerateToken(user), RefreshToken = refreshToken };
+        }
+
+        public async Task<Auth> RefreshAccessTokenAsync(string refreshToken)
+        {
+            var stored = await _ctx.RefreshTokens
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Token == refreshToken);
+
+            if (stored == null || !stored.IsActive)
+                return default;
+
+            stored.IsRevoked = true;
+
+            var newRefreshToken = await GenerateRefreshTokenAsync(stored.UserId);
+
+            return new Auth
+            {
+                AccessToken = _jwtService.GenerateToken(stored.User),
+                RefreshToken = newRefreshToken
+            };
+        }
+
+        public async Task RevokeRefreshTokenAsync(string refreshToken)
+        {
+            var stored = await _ctx.RefreshTokens
+                .FirstOrDefaultAsync(x => x.Token == refreshToken);
+
+            if (stored == null) return;
+
+            stored.IsRevoked = true;
+            await _ctx.SaveChangesAsync();
+        }
+
+        private async Task<string> GenerateRefreshTokenAsync(Guid userId)
+        {
+            var expired = await _ctx.RefreshTokens
+                .Where(x => x.UserId == userId && (x.IsRevoked || x.ExpiresAt < DateTime.UtcNow))
+                .ToListAsync();
+            _ctx.RefreshTokens.RemoveRange(expired);
+
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+            await _ctx.RefreshTokens.AddAsync(new RefreshToken
+            {
+                UserId = userId,
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+            await _ctx.SaveChangesAsync();
+
+            return token;
         }
 
         public async Task<string> GeneratePasswordResetCodeAsync(string email)
@@ -111,6 +166,16 @@ namespace WebApplication.Managers
             user.PasswordResetExpiry = null;
             await _ctx.SaveChangesAsync();
 
+            return true;
+        }
+
+        public async Task<bool> ResetTwoFactAuthAsync(Guid userId)
+        {
+            var user = await _ctx.Users.FindAsync(userId);
+            if (user == null) return false;
+
+            user.Key = null;
+            await _ctx.SaveChangesAsync();
             return true;
         }
 

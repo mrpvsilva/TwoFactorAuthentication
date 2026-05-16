@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import { Lock } from 'react-bootstrap-icons';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
@@ -74,7 +74,7 @@ export default function ResetPassword() {
                 </div>
                 <ErrorMessage error={errors.confirmPassword} />
                 <button className="btn btn-success w-100" disabled={isSubmitting}>
-                  {isSubmitting ? 'Saving...' : 'Save New Password'}
+                  {isSubmitting ? <Spinner size="sm" /> : 'Save New Password'}
                 </button>
               </form>
             </div>

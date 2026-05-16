@@ -2,25 +2,26 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Person, Lock } from 'react-bootstrap-icons';
 import { Link, useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
+import { useAuth } from '../AuthContext';
 import './Login.css';
 
 export default function Login() {
-
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { accessToken } = useAuth();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { email: '', password: '' }
   });
 
   useEffect(() => {
-    if (localStorage.getItem('token')) navigate('/');
-  }, [navigate]);
+    if (accessToken) navigate('/');
+  }, [accessToken, navigate]);
 
-  const onSubmit = data => {
-    Api.post('/auth', data)
+  const onSubmit = async data => {
+    await Api.post('/auth', data)
       .then(({ data }) => {
         if (data) {
           sessionStorage.tfa = JSON.stringify(data);
@@ -70,7 +71,9 @@ export default function Login() {
                 <ErrorMessage error={errors.password} />
                 <div className="row">
                   <div className="col-6">
-                    <button className="px-4 btn btn-primary">Login</button>
+                    <button className="px-4 btn btn-primary" disabled={isSubmitting}>
+                      {isSubmitting ? <Spinner size="sm" /> : 'Login'}
+                    </button>
                   </div>
                   <div className="text-end col-6">
                     <button type="button" className="px-0 btn btn-link" onClick={() => navigate('/forgot-password')}>Forgot password?</button>

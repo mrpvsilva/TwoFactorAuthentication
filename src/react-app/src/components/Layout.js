@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import NavMenu from './NavMenu';
 import Home from './Home';
 import FetchData from './FetchData';
+import ResetTwoFa from './ResetTwoFa';
 
 export default function Layout() {
   return (
@@ -13,6 +14,7 @@ export default function Layout() {
         <Routes>
           <Route path='Home' element={<Home />} />
           <Route path='fetch-data' element={<FetchData />} />
+          <Route path='reset-totp' element={<ResetTwoFa />} />
           <Route path='*' element={<Navigate to='/Home' replace />} />
         </Routes>
       </Container>

@@ -58,15 +58,20 @@ Controllers/
  PasswordController.cs
  PersonsController.cs
 Data/TfaContext.cs
-Entities/User.cs
+Entities/
+ RefreshToken.cs
+ User.cs
 Filters/NotificationFilter.cs
 Handlers/
  AddTwoFactAuthHandler.cs
  AuthHandler.cs
  ForgotPasswordHandler.cs
+ RefreshTokenHandler.cs
  RegisterUserHandler.cs
  RequestHandler.cs
  ResetPasswordHandler.cs
+ ResetTwoFactAuthHandler.cs
+ RevokeRefreshTokenHandler.cs
  VerifyCodeHandler.cs
  VerifyResetCodeHandler.cs
 IoC/
@@ -85,14 +90,19 @@ Migrations/
  20260515205425_InitialCreate.Designer.cs
  20260516153446_AddPasswordResetFields.cs
  20260516153446_AddPasswordResetFields.Designer.cs
+ 20260516200915_AddRefreshTokens.cs
+ 20260516200915_AddRefreshTokens.Designer.cs
  TfaContextModelSnapshot.cs
 Models/
  Account.cs
  AddTwoFactAuth.cs
  Auth.cs
  ForgotPassword.cs
+ RefreshTokenRequest.cs
  RegisterUser.cs
  ResetPassword.cs
+ ResetTwoFactAuth.cs
+ RevokeRefreshToken.cs
  TwoFactAuth.cs
  VerifyCode.cs
  VerifyResetCode.cs

@@ -15,5 +15,8 @@ namespace WebApplication.Managers
         Task<string> GeneratePasswordResetCodeAsync(string email);
         Task<bool> VerifyPasswordResetCodeAsync(string email, string code);
         Task<bool> ResetPasswordAsync(string email, string code, string newPassword);
+        Task<bool> ResetTwoFactAuthAsync(Guid userId);
+        Task<Auth> RefreshAccessTokenAsync(string refreshToken);
+        Task RevokeRefreshTokenAsync(string refreshToken);
     }
 }

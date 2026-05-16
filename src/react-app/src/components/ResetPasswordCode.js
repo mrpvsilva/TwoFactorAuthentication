@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
 
@@ -53,7 +53,7 @@ export default function ResetPasswordCode() {
                 </div>
                 <ErrorMessage error={errors.code} />
                 <button className="btn btn-primary w-100" disabled={isSubmitting}>
-                  {isSubmitting ? 'Verifying...' : 'Verify Code'}
+                  {isSubmitting ? <Spinner size="sm" /> : 'Verify Code'}
                 </button>
                 <button
                   type="button"

@@ -2,17 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import { toast } from 'react-toastify';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Files } from 'react-bootstrap-icons';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
+import { useAuth } from '../AuthContext';
 
 export default function TwoFactAuth() {
   const navigate = useNavigate();
+  const { setAccessToken } = useAuth();
   const [tfa, setTfa] = useState({ authenticatorUri: '', hash: '', hasTwoFactorAuth: '', sharedKey: '' });
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { code: '' }
   });
 
@@ -25,13 +27,13 @@ export default function TwoFactAuth() {
     setTfa(JSON.parse(tfaData));
   }, [navigate]);
 
-  const onSubmit = data => {
+  const onSubmit = async data => {
     const { hasTwoFactorAuth } = tfa;
-    Api.post(`/auth/${hasTwoFactorAuth ? 'VerifyCode' : 'AddTwoFactAuth'}`, { ...data, ...tfa })
+    await Api.post(`/auth/${hasTwoFactorAuth ? 'VerifyCode' : 'AddTwoFactAuth'}`, { ...data, ...tfa })
       .then(({ data }) => {
-        if (data) {
+        if (data?.accessToken) {
           sessionStorage.removeItem('tfa');
-          localStorage.token = JSON.stringify(data);
+          setAccessToken(data.accessToken);
           navigate('/');
           toast.success('Success');
         }
@@ -81,8 +83,10 @@ export default function TwoFactAuth() {
                   />
                 </div>
                 <ErrorMessage error={errors.code} />
-                <button className="btn btn-success w-100">Verify Code</button>
-                <button type="button" className="btn btn-outline-secondary w-100 mt-2" onClick={() => navigate(-1)}>Back</button>
+                <button className="btn btn-success w-100" disabled={isSubmitting}>
+                  {isSubmitting ? <Spinner size="sm" /> : 'Verify Code'}
+                </button>
+                <button type="button" className="btn btn-outline-secondary w-100 mt-2" onClick={() => navigate(-1)} disabled={isSubmitting}>Back</button>
               </form>
             </div>
           </div>

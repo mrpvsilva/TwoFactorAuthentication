@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WebApplication.Entities
 {
@@ -11,6 +12,7 @@ namespace WebApplication.Entities
         public string PasswordResetCode { get; set; }
         public DateTime? PasswordResetExpiry { get; set; }
         public bool HasTwoFactorAuth { get { return !string.IsNullOrEmpty(Key); } }
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
         public void HashPasword()
         {

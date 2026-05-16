@@ -2,21 +2,21 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Lock } from 'react-bootstrap-icons';
 import { useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import Api from '../api';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { email: '', password: '', repeatpassword: '' }
   });
 
   const password = watch('password', '');
 
-  const onSubmit = data => {
-    Api.post('/account', data)
+  const onSubmit = async data => {
+    await Api.post('/account', data)
       .then(({ data }) => {
         if (data) {
           navigate('/login');
@@ -79,8 +79,10 @@ export default function Register() {
                   />
                 </div>
                 <ErrorMessage error={errors.repeatpassword} />
-                <button className="btn btn-success w-100">Create Account</button>
-                <button type="button" className="btn btn-outline-secondary w-100 mt-2" onClick={() => navigate(-1)}>Back</button>
+                <button className="btn btn-success w-100" disabled={isSubmitting}>
+                  {isSubmitting ? <Spinner size="sm" /> : 'Create Account'}
+                </button>
+                <button type="button" className="btn btn-outline-secondary w-100 mt-2" onClick={() => navigate(-1)} disabled={isSubmitting}>Back</button>
               </form>
             </div>
           </div>
