@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using WebApplication.Filters;
 using WebApplication.Data;
@@ -84,8 +85,12 @@ namespace WebApplication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TfaContext ctx)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TfaContext ctx, ILogger<Startup> logger)
         {
+            var allowedOrigins = Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+            if (allowedOrigins.Length == 0)
+                logger.LogWarning("AllowedOrigins not configured — all cross-origin requests will be blocked by CORS.");
+
             // migrate any database changes on startup (includes initial db creation)
             ctx.Database.Migrate();
 

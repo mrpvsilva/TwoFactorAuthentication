@@ -33,7 +33,7 @@ namespace WebApplication.Controllers
         public async Task<IActionResult> AddTwoFactAuth([FromBody] AddTwoFactAuth addTwoFactAuth)
         {
             var auth = await _mediator.Send(addTwoFactAuth);
-            if (auth == null) return Ok(null);
+            if (auth == null) return BadRequest();
 
             SetRefreshTokenCookie(auth.RefreshToken);
             return Ok(new { auth.AccessToken });
@@ -44,7 +44,7 @@ namespace WebApplication.Controllers
         public async Task<IActionResult> VerifyCode([FromBody] VerifyCode verify)
         {
             var auth = await _mediator.Send(verify);
-            if (auth == null) return Ok(null);
+            if (auth == null) return BadRequest();
 
             SetRefreshTokenCookie(auth.RefreshToken);
             return Ok(new { auth.AccessToken });

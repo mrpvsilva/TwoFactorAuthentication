@@ -14,7 +14,7 @@ namespace WebApplication.Entities
         public bool HasTwoFactorAuth { get { return !string.IsNullOrEmpty(Key); } }
         public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
-        public void HashPasword()
+        public void HashPassword()
         {
             Password = BCrypt.Net.BCrypt.HashPassword(Password);
         }

@@ -29,7 +29,7 @@ namespace WebApplication.Managers
 
         public async Task<User> AddUserAsync(User user)
         {
-            user.HashPasword();
+            user.HashPassword();
             await _ctx.AddAsync(user);
             await _ctx.SaveChangesAsync();
 
@@ -39,6 +39,8 @@ namespace WebApplication.Managers
         public async Task<TwoFactAuth> GetTwoFactAuthAsync(string email)
         {
             var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null) return null;
+
             string unformattedKey = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey());
 
             return new TwoFactAuth
@@ -65,6 +67,8 @@ namespace WebApplication.Managers
                 return default;
 
             var user = await _ctx.Users.FindAsync(id);
+            if (user == null) return default;
+
             user.Key = secret;
             await _ctx.SaveChangesAsync();
 
@@ -139,7 +143,7 @@ namespace WebApplication.Managers
             var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
             if (user == null) return null;
 
-            var code = new Random().Next(100000, 999999).ToString();
+            var code = (100000 + (BitConverter.ToUInt32(RandomNumberGenerator.GetBytes(4)) % 900000)).ToString();
             user.PasswordResetCode = BCrypt.Net.BCrypt.HashPassword(code);
             user.PasswordResetExpiry = DateTime.UtcNow.AddMinutes(15);
             await _ctx.SaveChangesAsync();
@@ -158,9 +162,11 @@ namespace WebApplication.Managers
 
         public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)
         {
-            if (!await VerifyPasswordResetCodeAsync(email, code)) return false;
-
             var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null || user.PasswordResetExpiry == null) return false;
+            if (DateTime.UtcNow > user.PasswordResetExpiry) return false;
+            if (!BCrypt.Net.BCrypt.Verify(code, user.PasswordResetCode)) return false;
+
             user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
             user.PasswordResetCode = null;
             user.PasswordResetExpiry = null;

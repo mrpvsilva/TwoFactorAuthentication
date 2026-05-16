@@ -34,10 +34,11 @@ namespace WebApplication.Handlers
 
             var code = await UserManager.GeneratePasswordResetCodeAsync(request.Email);
 
-            await _emailService.SendAsync(
-                request.Email,
-                "Password Reset Code",
-                BuildEmailBody(code));
+            if (code != null)
+                await _emailService.SendAsync(
+                    request.Email,
+                    "Password Reset Code",
+                    BuildEmailBody(code));
 
             return true;
         }
