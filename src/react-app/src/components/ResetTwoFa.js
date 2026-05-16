@@ -1,21 +1,20 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button, Spinner } from 'reactstrap';
 import { toast } from 'react-toastify';
 import api from '../api';
+import { useAuth } from '../AuthContext';
 
 export default function ResetTwoFa() {
   const [loading, setLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
-  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const handleReset = async () => {
     setLoading(true);
     try {
       await api.delete('/auth/totp');
       toast.success('Código TOTP resetado com sucesso. Faça login novamente para configurar um novo.');
-      localStorage.removeItem('token');
-      navigate('/login');
+      await logout();
     } finally {
       setLoading(false);
     }
