@@ -79,6 +79,41 @@ namespace WebApplication.Managers
             return new Auth { AccessToken = _jwtService.GenerateToken(user) };
         }
 
+        public async Task<string> GeneratePasswordResetCodeAsync(string email)
+        {
+            var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null) return null;
+
+            var code = new Random().Next(100000, 999999).ToString();
+            user.PasswordResetCode = BCrypt.Net.BCrypt.HashPassword(code);
+            user.PasswordResetExpiry = DateTime.UtcNow.AddMinutes(15);
+            await _ctx.SaveChangesAsync();
+
+            return code;
+        }
+
+        public async Task<bool> VerifyPasswordResetCodeAsync(string email, string code)
+        {
+            var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null || user.PasswordResetExpiry == null) return false;
+            if (DateTime.UtcNow > user.PasswordResetExpiry) return false;
+
+            return BCrypt.Net.BCrypt.Verify(code, user.PasswordResetCode);
+        }
+
+        public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)
+        {
+            if (!await VerifyPasswordResetCodeAsync(email, code)) return false;
+
+            var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.PasswordResetCode = null;
+            user.PasswordResetExpiry = null;
+            await _ctx.SaveChangesAsync();
+
+            return true;
+        }
+
         private bool VerifyTotp(string secret, string code) =>
             new Totp(Base32Encoding.ToBytes(secret)).VerifyTotp(code, out _);
 

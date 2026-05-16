@@ -12,5 +12,8 @@ namespace WebApplication.Managers
         Task<TwoFactAuth> GetTwoFactAuthAsync(string email);
         Task<Auth> AddTwoFactorTokenAsync(Guid id, string authenticatorUri, string code);
         Task<Auth> VerifyCodeAsync(Guid id, string code);
+        Task<string> GeneratePasswordResetCodeAsync(string email);
+        Task<bool> VerifyPasswordResetCodeAsync(string email, string code);
+        Task<bool> ResetPasswordAsync(string email, string code, string newPassword);
     }
 }

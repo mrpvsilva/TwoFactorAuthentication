@@ -1,16 +1,18 @@
-using WebApplication.Data;
-using WebApplication.Notifications;
-using Microsoft.EntityFrameworkCore;
-using MediatR;
-using WebApplication.Managers;
-using WebApplication.Validators;
-using WebApplication.Jwt;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using WebApplication.Data;
+using WebApplication.Notifications;
+using WebApplication.Managers;
+using WebApplication.Validators;
+using WebApplication.Jwt;
+using WebApplication.Services;
+using Microsoft.EntityFrameworkCore;
+using MediatR;
+using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Resend;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -25,6 +27,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IUserManager, UserManager>();
             services.AddScoped<RegisterUserValidator>();
             services.AddScoped<AuthValidator>();
+            services.AddScoped<ForgotPasswordValidator>();
+            services.AddScoped<VerifyResetCodeValidator>();
+            services.AddScoped<ResetPasswordValidator>();
+
+            services.Configure<EmailSettings>(configuration.GetSection("Email"));
+            services.AddResend(options =>
+            {
+                options.ApiToken = Environment.GetEnvironmentVariable("RESEND_API_KEY") ?? string.Empty;
+            });
+            services.AddScoped<IEmailService, EmailService>();
 
             services.AddJwtAuthentication(configuration);
         }

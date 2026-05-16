@@ -55,6 +55,7 @@ TemporaryDependencyNodeTargetIdentifier=net8.0
 Controllers/
  AccountController.cs
  AuthController.cs
+ PasswordController.cs
  PersonsController.cs
 Data/TfaContext.cs
 Entities/User.cs
@@ -62,9 +63,12 @@ Filters/NotificationFilter.cs
 Handlers/
  AddTwoFactAuthHandler.cs
  AuthHandler.cs
+ ForgotPasswordHandler.cs
  RegisterUserHandler.cs
  RequestHandler.cs
+ ResetPasswordHandler.cs
  VerifyCodeHandler.cs
+ VerifyResetCodeHandler.cs
 IoC/Register.cs
 Jwt/
  IJwtService.cs
@@ -77,14 +81,19 @@ Managers/
 Migrations/
  20260515205425_InitialCreate.cs
  20260515205425_InitialCreate.Designer.cs
+ 20260516153446_AddPasswordResetFields.cs
+ 20260516153446_AddPasswordResetFields.Designer.cs
  TfaContextModelSnapshot.cs
 Models/
  Account.cs
  AddTwoFactAuth.cs
  Auth.cs
+ ForgotPassword.cs
  RegisterUser.cs
+ ResetPassword.cs
  TwoFactAuth.cs
  VerifyCode.cs
+ VerifyResetCode.cs
 Notifications/
  Notification.cs
  NotificationContext.cs
@@ -94,10 +103,16 @@ obj/Debug/net8.0/
  WebApplication.RazorAssemblyInfo.cs
 Pages/Error.cshtml.cs
 Program.cs
+Services/
+ EmailService.cs
+ IEmailService.cs
 Startup.cs
 Validators/
  AuthValidator.cs
+ ForgotPasswordValidator.cs
  RegisterUserValidator.cs
+ ResetPasswordValidator.cs
+ VerifyResetCodeValidator.cs
 
 [metadataReferences]
 <DOTNET>/packs/Microsoft.AspNetCore.App.Ref/8.0.22/ref/net8.0/
@@ -465,6 +480,7 @@ Validators/
  nuget.protocol/6.11.0/lib/net5.0/NuGet.Protocol.dll
  nuget.versioning/6.11.0/lib/netstandard2.0/NuGet.Versioning.dll
  otp.net/1.4.0/lib/net8.0/Otp.NET.dll
+ resend/0.5.1/lib/net8.0/Resend.dll
  swashbuckle.aspnetcore.swagger/6.9.0/lib/net8.0/Swashbuckle.AspNetCore.Swagger.dll
  swashbuckle.aspnetcore.swaggergen/6.9.0/lib/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
  swashbuckle.aspnetcore.swaggerui/6.9.0/lib/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll
