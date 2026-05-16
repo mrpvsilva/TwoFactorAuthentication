@@ -29,16 +29,17 @@ namespace WebApplication
                 options.Filters.Add(typeof(NotificationFilter));
             });
 
+            var allowedOrigins = Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    if (allowedOrigins.Length > 0)
+                        builder.WithOrigins(allowedOrigins)
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
                 });
-
             });
 
             // In production, the React files will be served from this directory
