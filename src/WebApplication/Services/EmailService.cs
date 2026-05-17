@@ -1,8 +1,9 @@
 using System;
-using System.Net;
-using System.Net.Mail;
 using System.Threading.Tasks;
+using MailKit.Net.Smtp;
+using MailKit.Security;
 using Microsoft.Extensions.Options;
+using MimeKit;
 
 namespace WebApplication.Services
 {
@@ -23,7 +24,6 @@ namespace WebApplication.Services
         public async Task SendAsync(string to, string subject, string body)
         {
             var smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST");
-            var smtpPort = Environment.GetEnvironmentVariable("SMTP_PORT");
             var smtpFrom = Environment.GetEnvironmentVariable("SMTP_FROM");
             var smtpUser = Environment.GetEnvironmentVariable("SMTP_USER");
             var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
@@ -32,24 +32,20 @@ namespace WebApplication.Services
                 string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
                 return;
 
-            _ = int.TryParse(smtpPort, out var port);
+            _ = int.TryParse(Environment.GetEnvironmentVariable("SMTP_PORT"), out var port);
+            if (port == 0) port = 587;
 
-            using var client = new SmtpClient(smtpHost, port)
-            {
-                EnableSsl = true,
-                Credentials = new NetworkCredential(smtpUser, smtpPassword)
-            };
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(_settings.FromName, smtpFrom));
+            message.To.Add(MailboxAddress.Parse(to));
+            message.Subject = subject;
+            message.Body = new TextPart("html") { Text = body };
 
-            var message = new MailMessage
-            {
-                From = new MailAddress(smtpFrom, _settings.FromName),
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = true
-            };
-            message.To.Add(to);
-
-            await client.SendMailAsync(message);
+            using var client = new SmtpClient();
+            await client.ConnectAsync(smtpHost, port, SecureSocketOptions.StartTls);
+            await client.AuthenticateAsync(smtpUser, smtpPassword);
+            await client.SendAsync(message);
+            await client.DisconnectAsync(quit: true);
         }
     }
 }
