@@ -8,4 +8,6 @@ export const authService = {
   addTwoFactor: (data) => api.post('/auth/AddTwoFactAuth', data),
   resetTotp: () => api.delete('/auth/totp'),
   register: (data) => api.post('/account', data),
+  sendEmailOtp: (data) => api.post('/emailotp/send', data),
+  verifyEmailOtp: (data) => api.post('/emailotp/verify', data),
 };

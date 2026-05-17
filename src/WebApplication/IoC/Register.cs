@@ -3,7 +3,9 @@ using System.IO;
 using System.Threading.Tasks;
 using WebApplication.Data;
 using WebApplication.Notifications;
+using WebApplication.Behaviors;
 using WebApplication.Managers;
+using WebApplication.Models;
 using WebApplication.Validators;
 using WebApplication.Jwt;
 using WebApplication.Services;
@@ -25,6 +27,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 x.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<WebApplication.Startup>());
             services.AddScoped<IUserManager, UserManager>();
+            services.AddScoped<IEmailOtpManager, EmailOtpManager>();
+            services.AddScoped(typeof(IPipelineBehavior<Account, TwoFactAuth>), typeof(PostLoginEmailOtpBehavior));
             services.AddScoped<RegisterUserValidator>();
             services.AddScoped<AuthValidator>();
             services.AddScoped<ForgotPasswordValidator>();

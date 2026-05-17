@@ -8,6 +8,7 @@ namespace WebApplication.Data
     {
         public DbSet<User> Users { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<EmailOtpCode> EmailOtpCodes { get; set; }
 
         public TfaContext(DbContextOptions<TfaContext> options) : base(options)
         {
@@ -18,6 +19,7 @@ namespace WebApplication.Data
         {
             modelBuilder.Entity<User>(UserBuilder);
             modelBuilder.Entity<RefreshToken>(RefreshTokenBuilder);
+            modelBuilder.Entity<EmailOtpCode>(EmailOtpCodeBuilder);
 
             base.OnModelCreating(modelBuilder);
         }
@@ -30,6 +32,17 @@ namespace WebApplication.Data
             builder
                 .HasIndex(x => x.Email)
                 .IsUnique();
+        }
+
+        private void EmailOtpCodeBuilder(EntityTypeBuilder<EmailOtpCode> builder)
+        {
+            builder.HasKey(x => x.Id);
+
+            builder
+                .HasOne(x => x.User)
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void RefreshTokenBuilder(EntityTypeBuilder<RefreshToken> builder)
