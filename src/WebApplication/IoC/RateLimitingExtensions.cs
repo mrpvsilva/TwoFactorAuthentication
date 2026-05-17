@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public const string AuthForgotPassword = "auth-forgot-password";
         public const string AuthResetPassword = "auth-reset-password";
         public const string AccountRegister = "account-register";
+        public const string AccountVerifyEmail = "account-verify-email";
         public const string AuthRefresh = "auth-refresh";
 
         public static void AddRateLimiting(this IServiceCollection services)
@@ -86,6 +87,18 @@ namespace Microsoft.Extensions.DependencyInjection
                         {
                             PermitLimit = 10,
                             Window = TimeSpan.FromHours(1),
+                            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                            QueueLimit = 0
+                        }));
+
+                // Verificação de e-mail no cadastro: 5 tentativas por minuto por IP
+                options.AddPolicy(AccountVerifyEmail, context =>
+                    RateLimitPartition.GetFixedWindowLimiter(
+                        partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                        factory: _ => new FixedWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            Window = TimeSpan.FromMinutes(1),
                             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                             QueueLimit = 0
                         }));

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { Person, Lock } from 'react-bootstrap-icons';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,9 +11,13 @@ import { authService } from '../services/authService';
 import { EMAIL_PATTERN } from '../validations';
 import './Login.css';
 
+const UNVERIFIED_MSG = 'não verificado';
+
 export default function Login() {
   const navigate = useNavigate();
   const { accessToken } = useAuth();
+  const [unverifiedEmail, setUnverifiedEmail] = useState(null);
+  const [resending, setResending] = useState(false);
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { email: '', password: '' }
   });
@@ -23,13 +27,34 @@ export default function Login() {
   }, [accessToken, navigate]);
 
   const onSubmit = async (data) => {
+    setUnverifiedEmail(null);
     try {
       const { data: tfa } = await authService.login(data);
       sessionStorage.setItem('tfa', JSON.stringify(tfa));
       toast.success('Success');
       navigate('/twofactauth');
-    } catch {}
+    } catch (error) {
+      const apiErrors = error.response?.data;
+      const isUnverified = Array.isArray(apiErrors) &&
+        apiErrors.some(e => e.message?.toLowerCase().includes(UNVERIFIED_MSG));
+      if (isUnverified) setUnverifiedEmail(data.email);
+    }
   };
+
+  const handleVerifyEmail = useCallback(async () => {
+    if (!unverifiedEmail) return;
+    setResending(true);
+    try {
+      const { data } = await authService.resendVerification({ email: unverifiedEmail });
+      sessionStorage.setItem('registration', JSON.stringify({ hash: data.hash }));
+      toast.info('Código de verificação enviado para o seu e-mail.');
+      navigate('/verify-registration');
+    } catch {
+      toast.error('Erro ao reenviar o código. Tente novamente.');
+    } finally {
+      setResending(false);
+    }
+  }, [unverifiedEmail, navigate]);
 
   return (
     <AuthCard>
@@ -58,6 +83,21 @@ export default function Login() {
           />
         </div>
         <ErrorMessage error={errors.password} />
+        {unverifiedEmail && (
+          <div className="alert alert-warning py-2 mb-3" role="alert">
+            <small>
+              Seu e-mail ainda não foi verificado.{' '}
+              <button
+                type="button"
+                className="alert-link btn btn-link p-0 align-baseline"
+                onClick={handleVerifyEmail}
+                disabled={resending}
+              >
+                {resending ? <Spinner size="sm" /> : 'Verificar agora'}
+              </button>
+            </small>
+          </div>
+        )}
         <div className="row">
           <div className="col-6">
             <button className="px-4 btn btn-primary" disabled={isSubmitting}>

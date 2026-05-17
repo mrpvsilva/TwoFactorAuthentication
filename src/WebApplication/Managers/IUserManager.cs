@@ -17,5 +17,7 @@ namespace WebApplication.Managers
         Task<bool> ResetPasswordAsync(string email, string code, string newPassword);
         Task<Auth> RefreshAccessTokenAsync(string refreshToken);
         Task RevokeRefreshTokenAsync(string refreshToken);
+        Task<bool> MarkEmailVerifiedAsync(Guid id);
+        Task<User> GetUnverifiedByEmailAsync(string email);
     }
 }

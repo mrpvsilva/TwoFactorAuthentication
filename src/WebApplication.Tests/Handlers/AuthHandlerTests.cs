@@ -29,7 +29,7 @@ public class AuthHandlerTests
     [Fact]
     public async Task Handle_ValidCredentials_ReturnsTwoFactAuth()
     {
-        var user = new Entities.User { Id = Guid.NewGuid(), Email = "user@test.com" };
+        var user = new Entities.User { Id = Guid.NewGuid(), Email = "user@test.com", EmailVerified = true };
         var expected = new TwoFactAuth { Hash = user.Id, HasTwoFactorAuth = false };
 
         _userManagerMock
@@ -90,5 +90,21 @@ public class AuthHandlerTests
 
         result.Should().BeNull();
         _notification.Notifications.Should().Contain(n => n.Message.Contains("Password is required"));
+    }
+
+    [Fact]
+    public async Task Handle_UnverifiedEmail_AddsNotificationAndReturnsNull()
+    {
+        var user = new Entities.User { Id = Guid.NewGuid(), Email = "user@test.com", EmailVerified = false };
+
+        _userManagerMock
+            .Setup(m => m.PasswordSignInAsync("user@test.com", "Password1!"))
+            .ReturnsAsync(user);
+
+        var handler = CreateHandler();
+        var result = await handler.Handle(new Account { Email = "user@test.com", Password = "Password1!" }, CancellationToken.None);
+
+        result.Should().BeNull();
+        _notification.Notifications.Should().Contain(n => n.Message.Contains("não verificado"));
     }
 }

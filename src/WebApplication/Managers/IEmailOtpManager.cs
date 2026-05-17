@@ -8,5 +8,6 @@ namespace WebApplication.Managers
     {
         Task<bool> SendAsync(Guid userId);
         Task<Auth> VerifyAsync(Guid userId, string code);
+        Task<bool> VerifyCodeOnlyAsync(Guid userId, string code);
     }
 }

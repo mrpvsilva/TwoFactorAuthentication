@@ -4,6 +4,7 @@ import PrivateRoute from './components/PrivateRoute';
 import Layout from './components/Layout';
 import Login from './components/Login';
 import Register from './components/Register';
+import VerifyRegistration from './components/VerifyRegistration';
 import TwoFactAuth from './components/TwoFactAuth';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPasswordCode from './components/ResetPasswordCode';
@@ -14,6 +15,7 @@ export default function AppRoutes() {
     <Routes>
       <Route path='/login' element={<Login />} />
       <Route path='/register' element={<Register />} />
+      <Route path='/verify-registration' element={<VerifyRegistration />} />
       <Route path='/twofactauth' element={<TwoFactAuth />} />
       <Route path='/forgot-password' element={<ForgotPassword />} />
       <Route path='/reset-password/code' element={<ResetPasswordCode />} />

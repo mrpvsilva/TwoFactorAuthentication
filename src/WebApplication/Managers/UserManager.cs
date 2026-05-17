@@ -29,11 +29,27 @@ namespace WebApplication.Managers
 
         public async Task<User> AddUserAsync(User user)
         {
+            var unverified = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == user.Email && !x.EmailVerified);
+            if (unverified != null) _ctx.Users.Remove(unverified);
+
             user.HashPassword();
             await _ctx.AddAsync(user);
             await _ctx.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task<User> GetUnverifiedByEmailAsync(string email) =>
+            await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email && !x.EmailVerified);
+
+        public async Task<bool> MarkEmailVerifiedAsync(Guid id)
+        {
+            var user = await _ctx.Users.FindAsync(id);
+            if (user == null) return false;
+
+            user.EmailVerified = true;
+            await _ctx.SaveChangesAsync();
+            return true;
         }
 
         public async Task<TwoFactAuth> GetTwoFactAuthAsync(string email)

@@ -27,7 +27,9 @@ namespace WebApplication.Validators
 
                     var user = await manager.PasswordSignInAsync(a.Email, a.Password);
 
-                    if (user == null) b.AddFailure("Invalid e-mail or password");
+                    if (user == null) { b.AddFailure("Invalid e-mail or password"); return; }
+
+                    if (!user.EmailVerified) b.AddFailure("E-mail não verificado. Verifique sua caixa de entrada.");
                 });
         }
     }

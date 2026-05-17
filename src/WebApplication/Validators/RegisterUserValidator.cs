@@ -15,7 +15,7 @@ namespace WebApplication.Validators
                 .WithMessage("E-mail is required")
                 .EmailAddress()
                 .WithMessage("E-mail format is invalid")
-                .MustAsync(async (email, ct) => !await ctx.Users.AnyAsync(x => x.Email == email))
+                .MustAsync(async (email, ct) => !await ctx.Users.AnyAsync(x => x.Email == email && x.EmailVerified))
                 .WithMessage("This e-mail is already registered");
 
             RuleFor(x => x.Password)

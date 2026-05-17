@@ -19,9 +19,10 @@ export default function Register() {
 
   const onSubmit = async (data) => {
     try {
-      await authService.register(data);
-      toast.success('Success');
-      navigate('/login');
+      const { data: result } = await authService.register(data);
+      sessionStorage.setItem('registration', JSON.stringify({ hash: result.hash }));
+      toast.success('Cadastro realizado! Verifique o código enviado ao seu e-mail.');
+      navigate('/verify-registration');
     } catch {}
   };
 

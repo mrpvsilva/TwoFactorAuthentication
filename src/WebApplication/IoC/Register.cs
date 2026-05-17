@@ -14,8 +14,6 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Resend;
-
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class Register
@@ -36,10 +34,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ResetPasswordValidator>();
 
             services.Configure<EmailSettings>(configuration.GetSection("Email"));
-            services.AddResend(options =>
-            {
-                options.ApiToken = Environment.GetEnvironmentVariable("RESEND_API_KEY") ?? string.Empty;
-            });
             services.AddScoped<IEmailService, EmailService>();
 
             services.AddJwtAuthentication(configuration);

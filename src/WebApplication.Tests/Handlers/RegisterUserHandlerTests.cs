@@ -15,12 +15,14 @@ namespace WebApplication.Tests.Handlers;
 public class RegisterUserHandlerTests
 {
     private readonly Mock<IUserManager> _userManagerMock;
+    private readonly Mock<IEmailOtpManager> _emailOtpManagerMock;
     private readonly NotificationContext _notification;
     private readonly TfaContext _context;
 
     public RegisterUserHandlerTests()
     {
         _userManagerMock = new Mock<IUserManager>();
+        _emailOtpManagerMock = new Mock<IEmailOtpManager>();
         _notification = new NotificationContext();
 
         var options = new DbContextOptionsBuilder<TfaContext>()
@@ -32,29 +34,35 @@ public class RegisterUserHandlerTests
     private RegisterUserHandler CreateHandler()
     {
         var validator = new RegisterUserValidator(_context);
-        return new RegisterUserHandler(_notification, _userManagerMock.Object, validator);
+        return new RegisterUserHandler(_notification, _userManagerMock.Object, _emailOtpManagerMock.Object, validator);
     }
 
     [Fact]
-    public async Task Handle_ValidNewUser_CreatesAndReturnsUser()
+    public async Task Handle_ValidNewUser_CreatesUserSendsOtpAndReturnsHash()
     {
+        var userId = Guid.NewGuid();
         _userManagerMock
             .Setup(m => m.AddUserAsync(It.IsAny<User>()))
-            .ReturnsAsync((User u) => u);
+            .ReturnsAsync((User u) => { u.Id = userId; return u; });
+
+        _emailOtpManagerMock
+            .Setup(m => m.SendAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(true);
 
         var handler = CreateHandler();
         var result = await handler.Handle(new RegisterUser { Email = "new@test.com", Password = "Password1!" }, CancellationToken.None);
 
         result.Should().NotBeNull();
-        result!.Email.Should().Be("new@test.com");
+        result!.Hash.Should().NotBeEmpty();
         _notification.HasNotifications.Should().BeFalse();
         _userManagerMock.Verify(m => m.AddUserAsync(It.IsAny<User>()), Times.Once);
+        _emailOtpManagerMock.Verify(m => m.SendAsync(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_DuplicateEmail_AddsNotificationAndReturnsNull()
+    public async Task Handle_DuplicateVerifiedEmail_AddsNotificationAndReturnsNull()
     {
-        _context.Users.Add(new User { Id = Guid.NewGuid(), Email = "exists@test.com", Password = "hashed" });
+        _context.Users.Add(new User { Id = Guid.NewGuid(), Email = "exists@test.com", Password = "hashed", EmailVerified = true });
         await _context.SaveChangesAsync();
 
         var handler = CreateHandler();
@@ -63,6 +71,27 @@ public class RegisterUserHandlerTests
         result.Should().BeNull();
         _notification.Notifications.Should().Contain(n => n.Message.Contains("already registered"));
         _userManagerMock.Verify(m => m.AddUserAsync(It.IsAny<User>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task Handle_DuplicateUnverifiedEmail_AllowsReRegistration()
+    {
+        _context.Users.Add(new User { Id = Guid.NewGuid(), Email = "pending@test.com", Password = "hashed", EmailVerified = false });
+        await _context.SaveChangesAsync();
+
+        _userManagerMock
+            .Setup(m => m.AddUserAsync(It.IsAny<User>()))
+            .ReturnsAsync((User u) => u);
+
+        _emailOtpManagerMock
+            .Setup(m => m.SendAsync(It.IsAny<Guid>()))
+            .ReturnsAsync(true);
+
+        var handler = CreateHandler();
+        var result = await handler.Handle(new RegisterUser { Email = "pending@test.com", Password = "Password1!" }, CancellationToken.None);
+
+        result.Should().NotBeNull();
+        _notification.HasNotifications.Should().BeFalse();
     }
 
     [Fact]

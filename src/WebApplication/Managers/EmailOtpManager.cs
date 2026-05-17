@@ -73,6 +73,21 @@ namespace WebApplication.Managers
             return new Auth { AccessToken = _jwtService.GenerateToken(otp.User), RefreshToken = refreshToken };
         }
 
+        public async Task<bool> VerifyCodeOnlyAsync(Guid userId, string code)
+        {
+            var otp = await _ctx.EmailOtpCodes
+                .Where(x => x.UserId == userId && !x.IsUsed && x.ExpiresAt > DateTime.UtcNow)
+                .OrderByDescending(x => x.ExpiresAt)
+                .FirstOrDefaultAsync();
+
+            if (otp == null || !BCrypt.Net.BCrypt.Verify(code, otp.Code))
+                return false;
+
+            otp.IsUsed = true;
+            await _ctx.SaveChangesAsync();
+            return true;
+        }
+
         private async Task<string> GenerateRefreshTokenAsync(Guid userId)
         {
             var expired = await _ctx.RefreshTokens
