@@ -175,16 +175,6 @@ namespace WebApplication.Managers
             return true;
         }
 
-        public async Task<bool> ResetTwoFactAuthAsync(Guid userId)
-        {
-            var user = await _ctx.Users.FindAsync(userId);
-            if (user == null) return false;
-
-            user.Key = null;
-            await _ctx.SaveChangesAsync();
-            return true;
-        }
-
         private bool VerifyTotp(string secret, string code) =>
             new Totp(Base32Encoding.ToBytes(secret)).VerifyTotp(code, out _);
 

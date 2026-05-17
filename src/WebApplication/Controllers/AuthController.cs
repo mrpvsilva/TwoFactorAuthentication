@@ -1,8 +1,6 @@
 using System;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -78,18 +76,6 @@ namespace WebApplication.Controllers
 
             ClearRefreshTokenCookie();
             return NoContent();
-        }
-
-        [HttpDelete("totp")]
-        [Authorize]
-        [EnableRateLimiting(RateLimitingExtensions.AuthResetTotp)]
-        public async Task<IActionResult> ResetTotp()
-        {
-            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (!Guid.TryParse(userIdStr, out var userId))
-                return Unauthorized();
-
-            return Ok(await _mediator.Send(new ResetTwoFactAuth { UserId = userId }));
         }
 
         private void SetRefreshTokenCookie(string token)

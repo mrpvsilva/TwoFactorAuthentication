@@ -23,9 +23,6 @@ export default function NavMenu() {
                 <NavLink tag={Link} className="text-dark" to='/fetch-data'>Fetch data</NavLink>
               </NavItem>
               <NavItem>
-                <NavLink tag={Link} className="text-dark" to='/reset-totp'>Reset TOTP</NavLink>
-              </NavItem>
-              <NavItem>
                 <NavLink href='#' className="text-dark" onClick={(e) => { e.preventDefault(); logout(); }}>Logout</NavLink>
               </NavItem>
             </ul>
