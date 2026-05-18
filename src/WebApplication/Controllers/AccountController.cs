@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using WebApplication.Models;
+using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.DependencyInjection;
+using WebApplication.Models;
 
 namespace WebApplication.Controllers
 {
@@ -17,10 +19,29 @@ namespace WebApplication.Controllers
         }
 
         [HttpPost]
+        [EnableRateLimiting(RateLimitingExtensions.AccountRegister)]
         public async Task<IActionResult> Register([FromBody] RegisterUser register)
         {
-            var user = await _mediator.Send(register);
-            return Ok(new { user?.Id, user?.Email });
+            var result = await _mediator.Send(register);
+            if (result == null) return BadRequest();
+            return Ok(new { result.Hash });
+        }
+
+        [HttpPost("verify-email")]
+        [EnableRateLimiting(RateLimitingExtensions.AccountVerifyEmail)]
+        public async Task<IActionResult> VerifyEmail([FromBody] VerifyRegistrationOtp request)
+        {
+            var success = await _mediator.Send(request);
+            return Ok(new { success });
+        }
+
+        [HttpPost("resend-verification")]
+        [EnableRateLimiting(RateLimitingExtensions.AccountVerifyEmail)]
+        public async Task<IActionResult> ResendVerification([FromBody] ResendRegistrationOtp request)
+        {
+            var result = await _mediator.Send(request);
+            if (result == null) return BadRequest();
+            return Ok(new { result.Hash });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace WebApplication.Entities
 {
@@ -8,12 +9,16 @@ namespace WebApplication.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public string Key { get; set; }
+        public string PasswordResetCode { get; set; }
+        public DateTime? PasswordResetExpiry { get; set; }
         public bool HasTwoFactorAuth { get { return !string.IsNullOrEmpty(Key); } }
+        public bool EmailVerified { get; set; } = false;
+        public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
-        public void HashPasword()
+        public void HashPassword()
         {
             Password = BCrypt.Net.BCrypt.HashPassword(Password);
-        }        
+        }
 
         public User()
         {

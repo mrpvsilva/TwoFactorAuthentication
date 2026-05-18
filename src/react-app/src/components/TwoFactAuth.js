@@ -1,93 +1,96 @@
-import React, { useState, useEffect } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Container } from 'reactstrap';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { Files } from 'react-bootstrap-icons';
 import ErrorMessage from './ErrorMessage';
-import Api from '../api';
+import AuthCard from './AuthCard';
+import { useAuth } from '../AuthContext';
+import { authService } from '../services/authService';
+import { Button } from 'src/components/ui/button';
+import { Input } from 'src/components/ui/input';
 
 export default function TwoFactAuth() {
   const navigate = useNavigate();
-  const [tfa, setTfa] = useState({ authenticatorUri: '', hash: '', hasTwoFactorAuth: '', sharedKey: '' });
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { setAccessToken } = useAuth();
+  const [hash, setHash] = useState(null);
+  const [sending, setSending] = useState(false);
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { code: '' }
   });
 
   useEffect(() => {
-    const tfaData = sessionStorage.getItem('tfa');
-    if (!tfaData) {
+    const raw = sessionStorage.getItem('tfa');
+    if (!raw) { navigate('/login'); return; }
+    try {
+      const tfa = JSON.parse(raw);
+      setHash(tfa.hash);
+    } catch {
       navigate('/login');
-      return;
     }
-    setTfa(JSON.parse(tfaData));
   }, [navigate]);
 
-  const onSubmit = data => {
-    const { hasTwoFactorAuth } = tfa;
-    Api.post(`/auth/${hasTwoFactorAuth ? 'VerifyCode' : 'AddTwoFactAuth'}`, { ...data, ...tfa })
-      .then(({ data }) => {
-        if (data) {
-          sessionStorage.removeItem('tfa');
-          localStorage.token = JSON.stringify(data);
-          navigate('/');
-          toast.success('Success');
-        }
-      })
-      .catch(() => {});
+  const resendCode = useCallback(async () => {
+    if (!hash) return;
+    setSending(true);
+    try {
+      await authService.sendEmailOtp({ hash });
+      toast.info('Código reenviado para o seu email');
+    } catch {
+      toast.error('Erro ao reenviar o código. Tente novamente');
+    } finally {
+      setSending(false);
+    }
+  }, [hash]);
+
+  const onSubmit = async ({ code }) => {
+    try {
+      const { data } = await authService.verifyEmailOtp({ hash, code });
+      if (data?.accessToken) {
+        sessionStorage.removeItem('tfa');
+        setAccessToken(data.accessToken);
+        toast.success('Autenticação realizada com sucesso');
+        navigate('/');
+      }
+    } catch {}
   };
 
   return (
-    <Container style={{ marginTop: '10%' }}>
-      <div className="justify-content-center row">
-        <div className="col-md-9 col-lg-7 col-xl-6">
-          <div className="mx-4 card">
-            <div className="p-4 card-body">
-              <form onSubmit={handleSubmit(onSubmit)}>
-                <h3>Two Factor Authentication</h3>
-                {tfa.sharedKey && (
-                  <div>
-                    <p>
-                      Digitalize o QR code ou digite esta chave <kbd>{tfa.sharedKey}</kbd>{' '}
-                      <CopyToClipboard
-                        title="Copiar"
-                        style={{ cursor: 'pointer' }}
-                        text={tfa.sharedKey}
-                        onCopy={() => toast.info('Chave copiada para área de transferência')}
-                      >
-                        <Files />
-                      </CopyToClipboard>
-                      {' '}no Google Authenticator.
-                    </p>
-                    <ul>
-                      <li><a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2">Android</a></li>
-                      <li><a href="https://apps.apple.com/br/app/google-authenticator/id388497605">IPhone</a></li>
-                    </ul>
-                  </div>
-                )}
-                <div className="mb-3 justify-content-center row">
-                  {tfa.authenticatorUri && <QRCodeSVG value={tfa.authenticatorUri} size={150} />}
-                </div>
-                <div className="mb-3 input-group">
-                  <input
-                    type="number"
-                    className="form-control"
-                    {...register('code', {
-                      required: 'Code is required',
-                      minLength: { value: 6, message: 'Code must have at least 6 characters' }
-                    })}
-                  />
-                </div>
-                <ErrorMessage error={errors.code} />
-                <button className="btn btn-success w-100">Verify Code</button>
-                <button type="button" className="btn btn-outline-secondary w-100 mt-2" onClick={() => navigate(-1)}>Back</button>
-              </form>
-            </div>
-          </div>
+    <AuthCard>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold">Verificação em Duas Etapas</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Um código de verificação foi enviado para o seu email.
+            Digite-o abaixo para continuar.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">O código expira em 10 minutos.</p>
         </div>
-      </div>
-    </Container>
+
+        <div className="space-y-1">
+          <Input
+            type="number"
+            placeholder="000000"
+            className="text-base text-center tracking-widest font-bold text-lg"
+            {...register('code', {
+              required: 'O código é obrigatório',
+              minLength: { value: 6, message: 'O código deve ter 6 dígitos' },
+              maxLength: { value: 6, message: 'O código deve ter 6 dígitos' }
+            })}
+          />
+          <ErrorMessage error={errors.code} />
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting || sending}>
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verificar Código'}
+        </Button>
+        <Button type="button" variant="outline" className="w-full" onClick={resendCode} disabled={sending || isSubmitting}>
+          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reenviar código'}
+        </Button>
+        <Button type="button" variant="ghost" className="w-full" onClick={() => navigate(-1)} disabled={isSubmitting}>
+          Voltar
+        </Button>
+      </form>
+    </AuthCard>
   );
 }

@@ -6,38 +6,41 @@ export default function FetchData() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Api.get('/persons')
-      .then(({ data }) => {
-        if (data) {
-          setPersons(data);
-          setLoading(false);
-        }
-      });
+    const controller = new AbortController();
+
+    Api.get('/persons', { signal: controller.signal })
+      .then(({ data }) => setPersons(data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+    return () => controller.abort();
   }, []);
 
   return (
-    <div>
-      <h1 id="tabelLabel">Persons</h1>
-      <p>This component demonstrates fetching data from the server.</p>
+    <div className="space-y-4">
+      <h1 id="tabelLabel" className="text-2xl font-bold">Persons</h1>
+      <p className="text-muted-foreground">This component demonstrates fetching data from the server.</p>
       {loading
-        ? <p><em>Loading...</em></p>
+        ? <p className="text-muted-foreground italic">Loading...</p>
         : (
-          <table className='table table-striped' aria-labelledby="tabelLabel">
-            <thead>
-              <tr>
-                <th>FirstName</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {persons.map(person => (
-                <tr key={person.id}>
-                  <td>{person.firstName}</td>
-                  <td>{person.email}</td>
+          <div className="overflow-x-auto rounded-md border">
+            <table className="min-w-full divide-y divide-border" aria-labelledby="tabelLabel">
+              <thead className="bg-muted">
+                <tr>
+                  <th className="px-4 py-3 text-left text-sm font-medium">FirstName</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium">Email</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {persons.map(person => (
+                  <tr key={person.id} className="hover:bg-muted/50">
+                    <td className="px-4 py-3 text-sm">{person.firstName}</td>
+                    <td className="px-4 py-3 text-sm">{person.email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )
       }
     </div>

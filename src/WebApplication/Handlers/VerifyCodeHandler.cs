@@ -18,7 +18,7 @@ namespace WebApplication.Handlers
 
             if (auth == null)
             {
-                Notification.AddNotification("code", "Code invalid");
+                Notification.AddNotification("code", "Invalid or expired verification code. Please try again");
             }
 
             return auth;

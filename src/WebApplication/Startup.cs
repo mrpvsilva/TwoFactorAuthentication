@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using WebApplication.Filters;
 using WebApplication.Data;
@@ -28,16 +30,18 @@ namespace WebApplication
                 options.Filters.Add(typeof(NotificationFilter));
             });
 
+            var allowedOrigins = Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader();
+                    if (allowedOrigins.Length > 0)
+                        builder.WithOrigins(allowedOrigins)
+                               .AllowAnyMethod()
+                               .AllowAnyHeader()
+                               .AllowCredentials();
                 });
-
             });
 
             // In production, the React files will be served from this directory
@@ -69,12 +73,24 @@ namespace WebApplication
                 });
             });
 
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
             services.AddApplicationServices(Configuration);
+            services.AddRateLimiting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TfaContext ctx)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, TfaContext ctx, ILogger<Startup> logger)
         {
+            var allowedOrigins = Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+            if (allowedOrigins.Length == 0)
+                logger.LogWarning("AllowedOrigins not configured — all cross-origin requests will be blocked by CORS.");
+
             // migrate any database changes on startup (includes initial db creation)
             ctx.Database.Migrate();
 
@@ -90,6 +106,7 @@ namespace WebApplication
             }
 
 
+            app.UseForwardedHeaders();
             app.UseCors();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
@@ -106,6 +123,7 @@ namespace WebApplication
             });
 
             app.UseRouting();
+            app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
 

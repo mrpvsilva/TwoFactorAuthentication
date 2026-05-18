@@ -3,6 +3,8 @@ using WebApplication.Data;
 using WebApplication.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
 using OtpNet;
 using WebApplication.Models;
@@ -27,16 +29,34 @@ namespace WebApplication.Managers
 
         public async Task<User> AddUserAsync(User user)
         {
-            user.HashPasword();
+            var unverified = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == user.Email && !x.EmailVerified);
+            if (unverified != null) _ctx.Users.Remove(unverified);
+
+            user.HashPassword();
             await _ctx.AddAsync(user);
             await _ctx.SaveChangesAsync();
 
             return user;
         }
 
+        public async Task<User> GetUnverifiedByEmailAsync(string email) =>
+            await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email && !x.EmailVerified);
+
+        public async Task<bool> MarkEmailVerifiedAsync(Guid id)
+        {
+            var user = await _ctx.Users.FindAsync(id);
+            if (user == null) return false;
+
+            user.EmailVerified = true;
+            await _ctx.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<TwoFactAuth> GetTwoFactAuthAsync(string email)
         {
             var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null) return null;
+
             string unformattedKey = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey());
 
             return new TwoFactAuth
@@ -63,20 +83,112 @@ namespace WebApplication.Managers
                 return default;
 
             var user = await _ctx.Users.FindAsync(id);
+            if (user == null) return default;
+
             user.Key = secret;
             await _ctx.SaveChangesAsync();
 
-            return new Auth { AccessToken = _jwtService.GenerateToken(user) };
+            var refreshToken = await GenerateRefreshTokenAsync(user.Id);
+            return new Auth { AccessToken = _jwtService.GenerateToken(user), RefreshToken = refreshToken };
         }
 
         public async Task<Auth> VerifyCodeAsync(Guid id, string code)
         {
             var user = await _ctx.Users.FindAsync(id);
 
-            if (!VerifyTotp(user.Key, code))
+            if (user == null || !VerifyTotp(user.Key, code))
                 return default;
 
-            return new Auth { AccessToken = _jwtService.GenerateToken(user) };
+            var refreshToken = await GenerateRefreshTokenAsync(user.Id);
+            return new Auth { AccessToken = _jwtService.GenerateToken(user), RefreshToken = refreshToken };
+        }
+
+        public async Task<Auth> RefreshAccessTokenAsync(string refreshToken)
+        {
+            var stored = await _ctx.RefreshTokens
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.Token == refreshToken);
+
+            if (stored == null || !stored.IsActive)
+                return default;
+
+            stored.IsRevoked = true;
+
+            var newRefreshToken = await GenerateRefreshTokenAsync(stored.UserId);
+
+            return new Auth
+            {
+                AccessToken = _jwtService.GenerateToken(stored.User),
+                RefreshToken = newRefreshToken
+            };
+        }
+
+        public async Task RevokeRefreshTokenAsync(string refreshToken)
+        {
+            var stored = await _ctx.RefreshTokens
+                .FirstOrDefaultAsync(x => x.Token == refreshToken);
+
+            if (stored == null) return;
+
+            stored.IsRevoked = true;
+            await _ctx.SaveChangesAsync();
+        }
+
+        private async Task<string> GenerateRefreshTokenAsync(Guid userId)
+        {
+            var expired = await _ctx.RefreshTokens
+                .Where(x => x.UserId == userId && (x.IsRevoked || x.ExpiresAt < DateTime.UtcNow))
+                .ToListAsync();
+            _ctx.RefreshTokens.RemoveRange(expired);
+
+            var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
+
+            await _ctx.RefreshTokens.AddAsync(new RefreshToken
+            {
+                UserId = userId,
+                Token = token,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+            await _ctx.SaveChangesAsync();
+
+            return token;
+        }
+
+        public async Task<string> GeneratePasswordResetCodeAsync(string email)
+        {
+            var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null) return null;
+
+            var code = (100000 + (BitConverter.ToUInt32(RandomNumberGenerator.GetBytes(4)) % 900000)).ToString();
+            user.PasswordResetCode = BCrypt.Net.BCrypt.HashPassword(code);
+            user.PasswordResetExpiry = DateTime.UtcNow.AddMinutes(15);
+            await _ctx.SaveChangesAsync();
+
+            return code;
+        }
+
+        public async Task<bool> VerifyPasswordResetCodeAsync(string email, string code)
+        {
+            var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null || user.PasswordResetExpiry == null) return false;
+            if (DateTime.UtcNow > user.PasswordResetExpiry) return false;
+
+            return BCrypt.Net.BCrypt.Verify(code, user.PasswordResetCode);
+        }
+
+        public async Task<bool> ResetPasswordAsync(string email, string code, string newPassword)
+        {
+            var user = await _ctx.Users.FirstOrDefaultAsync(x => x.Email == email);
+            if (user == null || user.PasswordResetExpiry == null) return false;
+            if (DateTime.UtcNow > user.PasswordResetExpiry) return false;
+            if (!BCrypt.Net.BCrypt.Verify(code, user.PasswordResetCode)) return false;
+
+            user.Password = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            user.PasswordResetCode = null;
+            user.PasswordResetExpiry = null;
+            await _ctx.SaveChangesAsync();
+
+            return true;
         }
 
         private bool VerifyTotp(string secret, string code) =>

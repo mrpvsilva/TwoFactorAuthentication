@@ -1,9 +1,8 @@
-﻿using MediatR;
-using WebApplication.Entities;
+using MediatR;
 
 namespace WebApplication.Models
 {
-    public class RegisterUser : IRequest<User>
+    public class RegisterUser : IRequest<RegisterResult>
     {
         public string Email { get; set; }
         public string Password { get; set; }
