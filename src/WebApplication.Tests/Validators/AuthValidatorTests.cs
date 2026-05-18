@@ -20,7 +20,7 @@ public class AuthValidatorTests
     [Fact]
     public async Task Validate_ValidCredentials_ReturnsValid()
     {
-        var user = new User { Id = Guid.NewGuid(), Email = "user@test.com" };
+        var user = new User { Id = Guid.NewGuid(), Email = "user@test.com", EmailVerified = true };
 
         _userManagerMock
             .Setup(m => m.PasswordSignInAsync("user@test.com", "Password1!"))

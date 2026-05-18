@@ -34,6 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ResetPasswordValidator>();
 
             services.Configure<EmailSettings>(configuration.GetSection("Email"));
+            services.AddHttpClient();
             services.AddScoped<IEmailService, EmailService>();
 
             services.AddJwtAuthentication(configuration);

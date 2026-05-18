@@ -1,9 +1,10 @@
 using System;
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using MailKit.Net.Smtp;
-using MailKit.Security;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MimeKit;
 
 namespace WebApplication.Services
 {
@@ -14,38 +15,70 @@ namespace WebApplication.Services
 
     public class EmailService : IEmailService
     {
+        private readonly HttpClient _http;
         private readonly EmailSettings _settings;
+        private readonly ILogger<EmailService> _logger;
 
-        public EmailService(IOptions<EmailSettings> options)
+        public EmailService(IHttpClientFactory httpClientFactory, IOptions<EmailSettings> options, ILogger<EmailService> logger)
         {
+            _http = httpClientFactory.CreateClient();
             _settings = options.Value;
+            _logger = logger;
         }
 
         public async Task SendAsync(string to, string subject, string body)
         {
-            var smtpHost = Environment.GetEnvironmentVariable("SMTP_HOST");
-            var smtpFrom = Environment.GetEnvironmentVariable("SMTP_FROM");
-            var smtpUser = Environment.GetEnvironmentVariable("SMTP_USER");
-            var smtpPassword = Environment.GetEnvironmentVariable("SMTP_PASSWORD");
+            var apiKey = Environment.GetEnvironmentVariable("BREVO_API_KEY");
+            var senderEmail = Environment.GetEnvironmentVariable("SMTP_FROM");
 
-            if (string.IsNullOrWhiteSpace(smtpHost) || string.IsNullOrWhiteSpace(smtpFrom) ||
-                string.IsNullOrWhiteSpace(smtpUser) || string.IsNullOrWhiteSpace(smtpPassword))
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                _logger.LogWarning("E-mail não enviado: variável de ambiente BREVO_API_KEY não configurada.");
                 return;
+            }
 
-            _ = int.TryParse(Environment.GetEnvironmentVariable("SMTP_PORT"), out var port);
-            if (port == 0) port = 587;
+            if (string.IsNullOrWhiteSpace(senderEmail))
+            {
+                _logger.LogWarning("E-mail não enviado: variável de ambiente SMTP_FROM não configurada.");
+                return;
+            }
 
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(_settings.FromName, smtpFrom));
-            message.To.Add(MailboxAddress.Parse(to));
-            message.Subject = subject;
-            message.Body = new TextPart("html") { Text = body };
+            var payload = new
+            {
+                sender = new { name = _settings.FromName, email = senderEmail },
+                to = new[] { new { email = to } },
+                subject,
+                htmlContent = body
+            };
 
-            using var client = new SmtpClient();
-            await client.ConnectAsync(smtpHost, port, SecureSocketOptions.StartTls);
-            await client.AuthenticateAsync(smtpUser, smtpPassword);
-            await client.SendAsync(message);
-            await client.DisconnectAsync(quit: true);
+            var request = new HttpRequestMessage(HttpMethod.Post, "https://api.brevo.com/v3/smtp/email")
+            {
+                Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
+            };
+            request.Headers.Add("api-key", apiKey);
+            request.Headers.Add("accept", "application/json");
+
+            try
+            {
+                _logger.LogInformation("Enviando e-mail para {To} com assunto '{Subject}'.", to, subject);
+
+                var response = await _http.SendAsync(request);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("E-mail enviado com sucesso para {To}. Status: {StatusCode}.", to, (int)response.StatusCode);
+                }
+                else
+                {
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    _logger.LogError("Falha ao enviar e-mail para {To}. Status: {StatusCode}. Resposta: {ResponseBody}.",
+                        to, (int)response.StatusCode, responseBody);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exceção ao tentar enviar e-mail para {To}.", to);
+            }
         }
     }
 }

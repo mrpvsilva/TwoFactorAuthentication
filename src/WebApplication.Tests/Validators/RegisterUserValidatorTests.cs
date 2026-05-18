@@ -32,7 +32,7 @@ public class RegisterUserValidatorTests
     public async Task Validate_DuplicateEmail_ReturnsInvalid()
     {
         using var ctx = CreateContext();
-        ctx.Users.Add(new User { Id = Guid.NewGuid(), Email = "exists@test.com", Password = "hashed" });
+        ctx.Users.Add(new User { Id = Guid.NewGuid(), Email = "exists@test.com", Password = "hashed", EmailVerified = true });
         await ctx.SaveChangesAsync();
 
         var validator = new RegisterUserValidator(ctx);
