@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -10,7 +11,14 @@ namespace WebApplication.Services
 {
     public class EmailSettings
     {
+        [Required]
         public string FromName { get; set; }
+
+        [Required]
+        public string ApiKey { get; set; }
+
+        [Required]
+        public string SenderEmail { get; set; }
     }
 
     public class EmailService : IEmailService
@@ -28,24 +36,9 @@ namespace WebApplication.Services
 
         public async Task SendAsync(string to, string subject, string body)
         {
-            var apiKey = Environment.GetEnvironmentVariable("BREVO_API_KEY");
-            var senderEmail = Environment.GetEnvironmentVariable("SMTP_FROM");
-
-            if (string.IsNullOrWhiteSpace(apiKey))
-            {
-                _logger.LogWarning("E-mail não enviado: variável de ambiente BREVO_API_KEY não configurada.");
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(senderEmail))
-            {
-                _logger.LogWarning("E-mail não enviado: variável de ambiente SMTP_FROM não configurada.");
-                return;
-            }
-
             var payload = new
             {
-                sender = new { name = _settings.FromName, email = senderEmail },
+                sender = new { name = _settings.FromName, email = _settings.SenderEmail },
                 to = new[] { new { email = to } },
                 subject,
                 htmlContent = body
@@ -55,7 +48,7 @@ namespace WebApplication.Services
             {
                 Content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json")
             };
-            request.Headers.Add("api-key", apiKey);
+            request.Headers.Add("api-key", _settings.ApiKey);
             request.Headers.Add("accept", "application/json");
 
             try

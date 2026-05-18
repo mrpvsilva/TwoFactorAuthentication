@@ -8,6 +8,7 @@
 		<PackageReference Include="AgileObjects.AgileMapper" Version="1.8.1" />
 		<PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
 		<PackageReference Include="Bogus" Version="35.6.5" />
+		<PackageReference Include="DotNetEnv" Version="3.1.1" />
 		<PackageReference Include="FluentValidation" Version="12.1.1" />
 		<!-- MediatR v13+ passou para licença comercial (RPL-1.5). Travado na última versão MIT gratuita da série 12.x -->
 		<PackageReference Include="MediatR" Version="[12.4.1, 13.0.0)" />

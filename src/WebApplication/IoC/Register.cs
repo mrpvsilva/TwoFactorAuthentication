@@ -33,7 +33,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<VerifyResetCodeValidator>();
             services.AddScoped<ResetPasswordValidator>();
 
-            services.Configure<EmailSettings>(configuration.GetSection("Email"));
+            services.AddOptions<EmailSettings>()
+                .BindConfiguration("Email")
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
             services.AddHttpClient();
             services.AddScoped<IEmailService, EmailService>();
 
