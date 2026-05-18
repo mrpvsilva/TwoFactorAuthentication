@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'reactstrap';
+import { Loader2 } from 'lucide-react';
 import ErrorMessage from './ErrorMessage';
 import AuthCard from './AuthCard';
 import { passwordService } from '../services/passwordService';
+import { Button } from 'src/components/ui/button';
+import { Input } from 'src/components/ui/input';
 
 export default function ResetPasswordCode() {
   const navigate = useNavigate();
@@ -34,37 +36,33 @@ export default function ResetPasswordCode() {
 
   return (
     <AuthCard>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <h1>Enter Code</h1>
-        <p className="text-muted">Enter the 6-digit code sent to your e-mail</p>
-        <div className="mb-3">
-          <input
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Enter Code</h1>
+          <p className="text-sm text-muted-foreground">Enter the 6-digit code sent to your e-mail</p>
+        </div>
+
+        <div className="space-y-1">
+          <Input
             type="text"
             inputMode="numeric"
             maxLength={6}
             placeholder="000000"
-            className="form-control form-control-lg text-center"
-            style={{ letterSpacing: '0.5em', fontWeight: 'bold' }}
+            className="text-base text-center tracking-[0.5em] font-bold text-lg"
             {...register('code', {
               required: 'Code is required',
-              pattern: {
-                value: /^[0-9]{6}$/,
-                message: 'Code must be exactly 6 digits'
-              }
+              pattern: { value: /^[0-9]{6}$/, message: 'Code must be exactly 6 digits' }
             })}
           />
+          <ErrorMessage error={errors.code} />
         </div>
-        <ErrorMessage error={errors.code} />
-        <button className="btn btn-primary w-100" disabled={isSubmitting}>
-          {isSubmitting ? <Spinner size="sm" /> : 'Verify Code'}
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline-secondary w-100 mt-2"
-          onClick={() => navigate('/forgot-password')}
-        >
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verify Code'}
+        </Button>
+        <Button type="button" variant="outline" className="w-full" onClick={() => navigate('/forgot-password')}>
           Resend Code
-        </button>
+        </Button>
       </form>
     </AuthCard>
   );

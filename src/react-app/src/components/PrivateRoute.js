@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { Spinner } from 'reactstrap';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 
 export default function PrivateRoute({ children }) {
@@ -9,8 +9,8 @@ export default function PrivateRoute({ children }) {
 
   if (isLoading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
-        <Spinner />
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }

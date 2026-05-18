@@ -1,34 +1,44 @@
 import React, { useState } from 'react';
-import { Collapse, Container, Navbar, NavbarBrand, NavbarToggler, NavItem, NavLink } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { useAuth } from '../AuthContext';
-import './NavMenu.css';
 
 export default function NavMenu() {
-  const [collapsed, setCollapsed] = useState(true);
+  const [open, setOpen] = useState(false);
   const { logout } = useAuth();
 
   return (
-    <header>
-      <Navbar className="navbar-expand-sm navbar-toggleable-sm ng-white border-bottom box-shadow mb-3" light>
-        <Container>
-          <NavbarBrand tag={Link} to='/'>WebApplication</NavbarBrand>
-          <NavbarToggler onClick={() => setCollapsed(prev => !prev)} className="ms-2" />
-          <Collapse className="d-sm-inline-flex flex-sm-row-reverse" isOpen={!collapsed} navbar>
-            <ul className="navbar-nav flex-grow">
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to='/'>Home</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink tag={Link} className="text-dark" to='/fetch-data'>Fetch data</NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink href='#' className="text-dark" onClick={(e) => { e.preventDefault(); logout(); }}>Logout</NavLink>
-              </NavItem>
-            </ul>
-          </Collapse>
-        </Container>
-      </Navbar>
+    <header className="border-b bg-white shadow-sm mb-4">
+      <nav className="container mx-auto px-4 h-14 flex items-center justify-between relative">
+        <Link to='/' className="font-semibold text-lg">WebApplication</Link>
+        <button
+          className="md:hidden p-2 rounded-md hover:bg-gray-100"
+          onClick={() => setOpen(prev => !prev)}
+          aria-label="Toggle menu"
+        >
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </button>
+        <ul className={`${open ? 'flex' : 'hidden'} md:flex flex-col md:flex-row absolute md:static top-14 left-0 right-0 bg-white md:bg-transparent border-b md:border-0 px-4 py-2 md:p-0 gap-1 md:gap-2 z-50`}>
+          <li>
+            <Link to='/' className="block px-3 py-2 text-sm rounded hover:bg-gray-100" onClick={() => setOpen(false)}>
+              Home
+            </Link>
+          </li>
+          <li>
+            <Link to='/fetch-data' className="block px-3 py-2 text-sm rounded hover:bg-gray-100" onClick={() => setOpen(false)}>
+              Fetch data
+            </Link>
+          </li>
+          <li>
+            <button
+              className="block w-full text-left px-3 py-2 text-sm rounded hover:bg-gray-100 text-red-600"
+              onClick={() => { setOpen(false); logout(); }}
+            >
+              Logout
+            </button>
+          </li>
+        </ul>
+      </nav>
     </header>
   );
 }

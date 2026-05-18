@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'reactstrap';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import AuthCard from './AuthCard';
 import { useAuth } from '../AuthContext';
 import { authService } from '../services/authService';
+import { Button } from 'src/components/ui/button';
+import { Input } from 'src/components/ui/input';
 
 export default function TwoFactAuth() {
   const navigate = useNavigate();
@@ -55,47 +57,39 @@ export default function TwoFactAuth() {
 
   return (
     <AuthCard>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <h3>Verificação em Duas Etapas</h3>
-        <p className="text-muted mb-1">
-          Um código de verificação foi enviado para o seu email.
-          Digite-o abaixo para continuar.
-        </p>
-        <p className="text-muted mb-3" style={{ fontSize: '0.875rem' }}>
-          O código expira em 10 minutos.
-        </p>
-        <div className="mb-3 input-group">
-          <input
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <h2 className="text-xl font-bold">Verificação em Duas Etapas</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Um código de verificação foi enviado para o seu email.
+            Digite-o abaixo para continuar.
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">O código expira em 10 minutos.</p>
+        </div>
+
+        <div className="space-y-1">
+          <Input
             type="number"
-            className="form-control"
             placeholder="000000"
+            className="text-base text-center tracking-widest font-bold text-lg"
             {...register('code', {
               required: 'O código é obrigatório',
               minLength: { value: 6, message: 'O código deve ter 6 dígitos' },
               maxLength: { value: 6, message: 'O código deve ter 6 dígitos' }
             })}
           />
+          <ErrorMessage error={errors.code} />
         </div>
-        <ErrorMessage error={errors.code} />
-        <button className="btn btn-success w-100" disabled={isSubmitting || sending}>
-          {isSubmitting ? <Spinner size="sm" /> : 'Verificar Código'}
-        </button>
-        <button
-          type="button"
-          className="btn btn-outline-secondary w-100 mt-2"
-          onClick={resendCode}
-          disabled={sending || isSubmitting}
-        >
-          {sending ? <Spinner size="sm" /> : 'Reenviar código'}
-        </button>
-        <button
-          type="button"
-          className="btn btn-link w-100 mt-1"
-          onClick={() => navigate(-1)}
-          disabled={isSubmitting}
-        >
+
+        <Button type="submit" className="w-full" disabled={isSubmitting || sending}>
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Verificar Código'}
+        </Button>
+        <Button type="button" variant="outline" className="w-full" onClick={resendCode} disabled={sending || isSubmitting}>
+          {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Reenviar código'}
+        </Button>
+        <Button type="button" variant="ghost" className="w-full" onClick={() => navigate(-1)} disabled={isSubmitting}>
           Voltar
-        </button>
+        </Button>
       </form>
     </AuthCard>
   );

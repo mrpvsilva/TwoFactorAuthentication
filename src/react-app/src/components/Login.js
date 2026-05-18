@@ -1,15 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
-import { Person, Lock } from 'react-bootstrap-icons';
+import { User, Lock, Loader2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Spinner } from 'reactstrap';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import AuthCard from './AuthCard';
 import { useAuth } from '../AuthContext';
 import { authService } from '../services/authService';
 import { EMAIL_PATTERN } from '../validations';
-import './Login.css';
+import { Button } from 'src/components/ui/button';
+import { Input } from 'src/components/ui/input';
 
 const UNVERIFIED_MSG = 'não verificado';
 
@@ -58,62 +58,69 @@ export default function Login() {
 
   return (
     <AuthCard>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <h1>Login</h1>
-        <p className="text-muted">Sign In to your account</p>
-        <div className="mb-3 input-group">
-          <span className="input-group-text"><Person /></span>
-          <input
-            placeholder="E-mail"
-            autoComplete="email"
-            type="text"
-            className="form-control"
-            {...register('email', { required: 'E-mail is required', pattern: EMAIL_PATTERN })}
-          />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">Login</h1>
+          <p className="text-sm text-muted-foreground">Sign In to your account</p>
         </div>
-        <ErrorMessage error={errors.email} />
-        <div className="mb-4 input-group">
-          <span className="input-group-text"><Lock /></span>
-          <input
-            placeholder="Password"
-            autoComplete="current-password"
-            type="password"
-            className="form-control"
-            {...register('password', { required: 'Password is required' })}
-          />
-        </div>
-        <ErrorMessage error={errors.password} />
-        {unverifiedEmail && (
-          <div className="alert alert-warning py-2 mb-3" role="alert">
-            <small>
-              Seu e-mail ainda não foi verificado.{' '}
-              <button
-                type="button"
-                className="alert-link btn btn-link p-0 align-baseline"
-                onClick={handleVerifyEmail}
-                disabled={resending}
-              >
-                {resending ? <Spinner size="sm" /> : 'Verificar agora'}
-              </button>
-            </small>
+
+        <div className="space-y-1">
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="E-mail"
+              autoComplete="email"
+              type="text"
+              className="pl-9 text-base"
+              {...register('email', { required: 'E-mail is required', pattern: EMAIL_PATTERN })}
+            />
           </div>
-        )}
-        <div className="row">
-          <div className="col-6">
-            <button className="px-4 btn btn-primary" disabled={isSubmitting}>
-              {isSubmitting ? <Spinner size="sm" /> : 'Login'}
+          <ErrorMessage error={errors.email} />
+        </div>
+
+        <div className="space-y-1">
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Password"
+              autoComplete="current-password"
+              type="password"
+              className="pl-9 text-base"
+              {...register('password', { required: 'Password is required' })}
+            />
+          </div>
+          <ErrorMessage error={errors.password} />
+        </div>
+
+        {unverifiedEmail && (
+          <div className="rounded-md bg-yellow-50 border border-yellow-200 px-3 py-2 text-sm text-yellow-800">
+            Seu e-mail ainda não foi verificado.{' '}
+            <button
+              type="button"
+              className="font-semibold underline disabled:opacity-50"
+              onClick={handleVerifyEmail}
+              disabled={resending}
+            >
+              {resending ? <Loader2 className="inline h-3 w-3 animate-spin" /> : 'Verificar agora'}
             </button>
           </div>
-          <div className="text-end col-6">
-            <button type="button" className="px-0 btn btn-link" onClick={() => navigate('/forgot-password')}>Forgot password?</button>
-          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-2">
+          <Button type="submit" className="flex-1" disabled={isSubmitting}>
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Login'}
+          </Button>
+          <Button type="button" variant="link" className="px-0 shrink-0" onClick={() => navigate('/forgot-password')}>
+            Forgot password?
+          </Button>
         </div>
+
+        <hr className="border-border" />
+        <p className="text-center text-sm text-muted-foreground">Don't have an account?</p>
+        <Button variant="outline" className="w-full" asChild>
+          <Link to="/register">Create account</Link>
+        </Button>
       </form>
-      <hr />
-      <p className="text-center text-muted mb-2">Don't have an account?</p>
-      <div className="text-center">
-        <Link to="/register" className="btn btn-outline-primary w-100">Create account</Link>
-      </div>
     </AuthCard>
   );
 }

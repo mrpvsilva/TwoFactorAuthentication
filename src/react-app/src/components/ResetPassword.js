@@ -1,13 +1,14 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { Spinner } from 'reactstrap';
-import { Lock } from 'react-bootstrap-icons';
+import { Lock, Loader2 } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ErrorMessage from './ErrorMessage';
 import AuthCard from './AuthCard';
 import { passwordService } from '../services/passwordService';
 import { PASSWORD_RULES } from '../validations';
+import { Button } from 'src/components/ui/button';
+import { Input } from 'src/components/ui/input';
 
 export default function ResetPassword() {
   const navigate = useNavigate();
@@ -47,36 +48,45 @@ export default function ResetPassword() {
 
   return (
     <AuthCard>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <h1>New Password</h1>
-        <p className="text-muted">Choose a strong password for your account</p>
-        <div className="mb-3 input-group">
-          <span className="input-group-text"><Lock /></span>
-          <input
-            placeholder="New password"
-            autoComplete="new-password"
-            type="password"
-            className="form-control"
-            {...register('password', PASSWORD_RULES)}
-          />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <h1 className="text-2xl font-bold">New Password</h1>
+          <p className="text-sm text-muted-foreground">Choose a strong password for your account</p>
         </div>
-        <ErrorMessage error={errors.password} />
-        <div className="mb-4 input-group">
-          <span className="input-group-text"><Lock /></span>
-          <input
-            placeholder="Confirm password"
-            autoComplete="new-password"
-            type="password"
-            className="form-control"
-            {...register('confirmPassword', {
-              validate: value => value === password || 'The passwords do not match'
-            })}
-          />
+
+        <div className="space-y-1">
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="New password"
+              autoComplete="new-password"
+              type="password"
+              className="pl-9 text-base"
+              {...register('password', PASSWORD_RULES)}
+            />
+          </div>
+          <ErrorMessage error={errors.password} />
         </div>
-        <ErrorMessage error={errors.confirmPassword} />
-        <button className="btn btn-success w-100" disabled={isSubmitting}>
-          {isSubmitting ? <Spinner size="sm" /> : 'Save New Password'}
-        </button>
+
+        <div className="space-y-1">
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Confirm password"
+              autoComplete="new-password"
+              type="password"
+              className="pl-9 text-base"
+              {...register('confirmPassword', {
+                validate: value => value === password || 'The passwords do not match'
+              })}
+            />
+          </div>
+          <ErrorMessage error={errors.confirmPassword} />
+        </div>
+
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save New Password'}
+        </Button>
       </form>
     </AuthCard>
   );

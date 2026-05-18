@@ -1,16 +1,14 @@
 import React from 'react';
-import { Container } from 'reactstrap';
+import { Card, CardContent } from 'src/components/ui/card';
 
 export default function AuthCard({ children }) {
   return (
-    <Container style={{ marginTop: '10%' }}>
-      <div className="justify-content-center row">
-        <div className="col-md-5 col-lg-4">
-          <div className="card">
-            <div className="p-4 card-body">{children}</div>
-          </div>
-        </div>
+    <div className="flex min-h-screen items-start justify-center px-4 pt-[10vh]">
+      <div className="w-full max-w-sm">
+        <Card>
+          <CardContent className="p-6">{children}</CardContent>
+        </Card>
       </div>
-    </Container>
+    </div>
   );
 }
